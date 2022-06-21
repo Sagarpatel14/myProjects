@@ -1,16 +1,26 @@
-const authorModel = require("../models/authorModel");
-
-
-let createAuthor = async function (req, res) {
+const authorModel = require('../models/authorModel');
+const validator = require('validator')
+const createAuthor = async function (req, res) {
     try {
-        let Data = req.body;
-        let saveData = await authorModel.create(Data);
-        res.status(201).send({ msg: saveData })
+        let data = req.body
+        if (data.fname != undefined && data.lname != undefined && data.email != undefined && data.password != undefined) {
+            let isValid = validator.isEmail(data.email)
+            let enumValues = ["Mr", "Mrs", "Miss"]
+            if (data.title != undefined && enumValues.includes(data.title) && isValid) {
+                let author = await authorModel.create(data)
+                res.status(201).send({ data: author })
+            }
+            else {
+                res.status(400).send({ msg: "enter all the fields correctly" })
+            }
+        }
+        else {
+            res.status(400).send({ msg: "enter all the details correctly" })
+        }
     }
-    catch (err) {
-        res.status(500).send({ status: false, msg: "SERVER ISSUES", reason: err.message })
+    catch(err){
+        res.status(500).send({errror : err.message})
     }
 }
 
-
-module.exports.createAuthor = createAuthor;
+module.exports = {createAuthor}
