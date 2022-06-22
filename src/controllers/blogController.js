@@ -1,3 +1,4 @@
+
 const blogModel = require("../models/blogModel");
 const authorModel = require("../models/authorModel")
 
@@ -20,6 +21,40 @@ let createBlog = async function (req, res) {
     }
     catch (err) {
         res.status(500).send({ status: false, msg: "SERVER ISSUES", reason: err.message })
+    }
+}
+
+const getBlogs = async function (req, res) {
+ try {  let authorId = req.query.authorId
+    let category = req.query.category
+    let tags = req.query.tags
+    let subcategory = req.query.subcategory
+
+    let obj = {
+        isDeleted: false,
+        isPublished: false
+    }
+
+    if (authorId) {
+        obj.authorId = authorId
+    }
+    if (category) {
+        obj.category = category
+    }
+    if (tags) {
+        obj.tags = tags
+    }
+    if (subcategory) {
+        obj.subcategory = subcategory
+    }
+
+    let savedData = await blogModel.find(obj)
+    if (savedData.length == 0) {
+        return res.status(400).send({ status: true, msg: "No such Blogs Available" })
+    } else {
+        return res.status(200).send({ msg: savedData })
+    } }catch(err){
+        res.status(500).send({ msg: err.message })
     }
 }
 
@@ -100,6 +135,8 @@ const deleteBlogByparam = async function(req , res){
 
 
 module.exports.createBlog = createBlog;
+module.exports.getBlogs = getBlogs;
 module.exports.deleteBlog = deleteBlog;
 module.exports.deleteBlogByparam = deleteBlogByparam;
 module.exports.updatedBlogs = updatedBlogs;
+
