@@ -10,6 +10,6 @@ router.post("/blogs", blogController.createBlog)
 router.get("/blogs", blogController.getBlogs)
 router.put("/blogs/:blogId", blogController.updatedBlogs)
 router.delete("/blogs/:blogId" , blogController.deleteBlog)
-router.delete("/blogs" , blogController.deleteBlogByparam)
+router.delete("/blogs" , blogController.deleteBlogByQuery)
 
 module.exports = router;

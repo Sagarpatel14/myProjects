@@ -1,3 +1,4 @@
+
 const blogModel = require("../models/blogModel");
 const authorModel = require("../models/authorModel")
 
@@ -127,7 +128,7 @@ const deleteBlog = async function (req, res) {
 
 
 
-const deleteBlogByparam = async function(req , res){
+const deleteBlogByQuery = async function(req , res){
     try{
         let authorId = req.query.authorId
         let category = req.query.category
@@ -176,4 +177,4 @@ module.exports.createBlog = createBlog;
 module.exports.getBlogs = getBlogs
 module.exports.updatedBlogs = updatedBlogs;
 module.exports.deleteBlog = deleteBlog;
-module.exports.deleteBlogByparam = deleteBlogByparam;
+module.exports.deleteBlogByQuery = deleteBlogByQuery;
