@@ -44,7 +44,7 @@ let createCollege = async function (req, res) {
 
 
         let saveData = await collegeModel.create(data)
-        res.status(201).send({ status: true, data: saveData })
+        return res.status(201).send({ status: true, data: saveData })
     }
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
@@ -56,19 +56,22 @@ let createCollege = async function (req, res) {
 
 let getCollegeDetails = async function (req, res) {
     try {
-        let query = req.query;
-        if (!queryValidator(query)) return res.status(400).send({ status: false, message: "please enter query" })
-        let college = await collegeModel.findOne( query )
+        let collegeName = req.query.collegeName;
+        if (!isValid(collegeName)) return res.status(400).send({ status: false, message: "please give an abbreviated college name" })
+
+        let college = await collegeModel.findOne( {name : collegeName} )
         if(!college) return res.status(404).send({status : false, message : "no such document available"})
+       
         let interns = await internModel.find({collegeId : college._id}).select({name:1,email:1,mobile:1});
-        if(interns.length == 0) return res.status(404).send({status : false, message : "no such document available"})
+        //if(interns.length == 0) return res.status(404).send({status : false, message : "no such document available"})
+     
         let collegeAndItsInterns = {
             "name" : college.name,
             "fullName" : college.fullName,
             "logoLink" : college.logoLink,
             "interns" : interns
         }
-        return res.status(201).send({ status: true, data: collegeAndItsInterns })
+        return res.status(200).send({ status: true, data: collegeAndItsInterns })
     }
     catch (err) {
         res.status(500).send({ status: false, error: err.message })

@@ -9,8 +9,8 @@ const isValid = function (val) {
     return true;
 }
 
-// const regexValidator = function(val){
-//     let regx = /^[a-zA-z]+([\s][a-zA-Z]+)*$/;
+// const regexValidator = function (val) {
+//     let regx = /^[a-zA-Z.]+$/;
 //     return regx.test(val);
 // }
 
@@ -19,7 +19,7 @@ const bodyValidator = function (data) {
     return Object.keys(data).length > 0
 }
 
-let createIntern = async function(req, res){
+let createIntern = async function (req, res) {
     try {
         let data = req.body
         if (!bodyValidator(data)) return res.status(400).send({ status: false, msg: "please enter body" })
@@ -27,12 +27,16 @@ let createIntern = async function(req, res){
         if (!isValid(data.email)) return res.status(400).send({ status: false, msg: "please enter email correctly" })
         if (!isValid(data.mobile)) return res.status(400).send({ status: false, msg: "please enter mobile no. correctly" })
         if (!isValid(data.collegeId)) return res.status(400).send({ status: false, msg: "please enter collegeId correctly" })
-        
+
         let usedEmail = await internModel.findOne({ email: data.email })
         if (usedEmail) return res.status(400).send({ status: false, msg: `${data.email} already registered` })
 
         if (await internModel.findOne({ mobile: data.mobile }))
             return res.status(400).send({ msg: "Mobile number already exist" })
+
+        if (!/^[a-zA-Z. ]+$/.test(data.name)) {
+            return res.status(400).send({ status: false, message: `name must contain only alphabets` })
+        }
 
         if (!/^\+\d{1,3}-\d{10}$/.test(data.mobile)) {
             return res.status(400).send({ status: false, message: `Please provide the correct format(+XX-XXXXXXXXXX) for mobile number` })
