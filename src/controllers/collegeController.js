@@ -63,7 +63,8 @@ let createCollege = async function (req, res) {
 
 let getCollegeDetails = async function (req, res) {
     try {
-        let collegeName = req.query.collegeName;
+        let clgName = req.query.collegeName;
+        let collegeName = clgName.toLowerCase()
         if (!isValid(collegeName)) return res.status(400).send({ status: false, message: "please give an abbreviated college name" })
 
         let college = await collegeModel.findOne({ name: collegeName })
