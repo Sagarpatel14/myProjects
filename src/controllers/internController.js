@@ -22,11 +22,12 @@ const bodyValidator = function (data) {
 let createIntern = async function (req, res) {
     try {
         let data = req.body
+        let collegeName = req.body.collegeName
         if (!bodyValidator(data)) return res.status(400).send({ status: false, msg: "please enter body" })
         if (!isValid(data.name)) return res.status(400).send({ status: false, msg: "please enter name correctly" })
         if (!isValid(data.email)) return res.status(400).send({ status: false, msg: "please enter email correctly" })
         if (!isValid(data.mobile)) return res.status(400).send({ status: false, msg: "please enter mobile no. correctly" })
-        if (!isValid(data.collegeId)) return res.status(400).send({ status: false, msg: "please enter collegeId correctly" })
+        if (!isValid(data.collegeName)) return res.status(400).send({ status: false, msg: "please enter college name correctly" })
 
         let usedEmail = await internModel.findOne({ email: data.email })
         if (usedEmail) return res.status(400).send({ status: false, msg: `${data.email} already registered` })
@@ -46,11 +47,20 @@ let createIntern = async function (req, res) {
             return res.status(400).send({ status: false, message: `Email should be a valid email address` });
         }
 
-        let isValidCollege = await collegeModel.findById(data.collegeId)
-        if (isValidCollege === null) res.status(400).send({ status: false, msg: "please enter correct collegeId" })
+        let college = await collegeModel.findOne({name : collegeName})
+        if (college === null) res.status(400).send({ status: false, msg: "No such college found" })
+        data.collegeId = college._id
 
-        let saveData = await internModel.create(data)
-        res.status(201).send({ status: true, data: saveData })
+        let internDetails = await internModel.create(data)
+
+        let intern = {
+            "isDeleted" : internDetails.isDeleted,
+            "name" : internDetails.name,
+            "email" : internDetails.email,
+            "mobile" : internDetails.mobile,
+            "collegeId" : `ObjectId(${internDetails.collegeId})`
+        }
+        res.status(201).send({ status: true, data: intern })
     }
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
