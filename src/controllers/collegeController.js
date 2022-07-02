@@ -17,17 +17,18 @@ const isValid = function (val) {
 const bodyValidator = function (data) {
     return Object.keys(data).length > 0
 }
-const queryValidator = function (query) {
-    return Object.keys(query).length > 0
-}
+// const queryValidator = function (query) {
+//     return Object.keys(query).length > 0
+// }
 
 let createCollege = async function (req, res) {
     try {
         let data = req.body
+        let { name, fullName, logoLink } = data
         if (!bodyValidator(data)) return res.status(400).send({ status: false, message: "please enter body" })
-        if (!isValid(data.name)) return res.status(400).send({ status: false, message: "please enter name correctly" })
-        if (!isValid(data.fullName)) return res.status(400).send({ status: false, message: "please enter full name correctly" })
-        if (!isValid(data.logoLink)) return res.status(400).send({ status: false, message: "please enter logo link correctly" })
+        if (!isValid(name)) return res.status(400).send({ status: false, message: "please enter name correctly" })
+        if (!isValid(fullName)) return res.status(400).send({ status: false, message: "please enter full name correctly" })
+        if (!isValid(logoLink)) return res.status(400).send({ status: false, message: "please enter logo link correctly" })
 
         if (await collegeModel.findOne({ name: data.name }))
             return res.status(400).send({ msg: "College name already exist" })
@@ -41,6 +42,9 @@ let createCollege = async function (req, res) {
         if (!/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%.\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%\+.~#?&//=]*)/g.test(data.logoLink)) {
             return res.status(400).send({ status: false, message: `please enter a valid URL` });
         }
+
+        let lowerCasedname = name.toLowerCase()
+        data.name = lowerCasedname
 
 
         let collegeDetails = await collegeModel.create(data)
@@ -64,14 +68,14 @@ let createCollege = async function (req, res) {
 let getCollegeDetails = async function (req, res) {
     try {
         let clgName = req.query.collegeName;
+        if (!isValid(clgName)) return res.status(400).send({ status: false, message: "please give an abbreviated college name" })
         let collegeName = clgName.toLowerCase()
-        if (!isValid(collegeName)) return res.status(400).send({ status: false, message: "please give an abbreviated college name" })
 
         let college = await collegeModel.findOne({ name: collegeName })
         if (!college) return res.status(404).send({ status: false, message: "no such document available" })
 
         let interns = await internModel.find({ collegeId: college._id }).select({ name: 1, email: 1, mobile: 1 });
-        //if(interns.length == 0) return res.status(404).send({status : false, message : "no such document available"})
+        if(interns.length == 0) return res.status(404).send({status : false, message : "no interns found in this college"})
 
         let collegeAndItsInterns = {
             "name": college.name,
