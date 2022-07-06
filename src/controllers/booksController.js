@@ -81,4 +81,4 @@ const getBooks= async function(req,res){
     else{return res.status(200).send({status:true,message:"Books list",data:data})}
 }
 
-module.exports = {createBooks}
+module.exports = {createBooks,getBooks}

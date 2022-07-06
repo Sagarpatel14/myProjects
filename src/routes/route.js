@@ -8,7 +8,7 @@ router.post("/register",userController.createUser)
 //——————————————————————————————Create Books———————————————————————————————————————
 router.post('/books', booksController.createBooks)
 //——————————————————————————————Get Books———————————————————————————————————————
-router.get("/books")
+router.get("/books",booksController.getBooks)
 
 
 
