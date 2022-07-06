@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const isValid= function(value){
     if (typeof value=== "undefined" || typeof value === "null") return false
     if (typeof value==="string" && value.trim().length===0) return false
@@ -36,4 +38,14 @@ const isValidPincode=(pin)=>{
     if(/^[1-9][0-9]{5}$/.test(pin))
     return true
 }
-module.exports={isValid,isValidName,isValidEmail,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode}
+
+const isValidDate=(date)=>{
+    if(/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/.test(date))
+    return true
+}
+
+const isValidObjectId = function(ObjectId){
+    return mongoose.Types.ObjectId.isValid(ObjectId)
+}
+
+module.exports={isValid,isValidName,isValidEmail,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode, isValidDate,isValidObjectId}
