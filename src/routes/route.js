@@ -5,11 +5,12 @@ const booksController = require('../controllers/booksController')
 
 //——————————————————————————————Create User———————————————————————————————————————
 router.post("/register",userController.createUser)
-
-
-//=============================Craete Book==========================================
-
+//——————————————————————————————Create Books———————————————————————————————————————
 router.post('/books', booksController.createBooks)
+//——————————————————————————————Get Books———————————————————————————————————————
+router.get("/books")
+
+
 
 
 module.exports=router
