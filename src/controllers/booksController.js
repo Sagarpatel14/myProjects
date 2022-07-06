@@ -11,12 +11,12 @@ const createBooks = async function (req, res) {
 
         if(isValidBody(data)) return res.status(400).send({status : false, message : 'please enter body'})
 
-        if(!("title" in data)) return res.status(400).send({status:false,msg:"Pls Enter Title, Its Required"})
-        if(!("excerpt" in data)) return res.status(400).send({status:false,msg:"Pls Enter excerpt, Its Required"})
-        if(!("ISBN" in data)) return res.status(400).send({status:false,msg:"Pls Enter ISBN, Its Required"})
-        if(!("category" in data)) return res.status(400).send({status:false,msg:"Pls Enter category, Its Required"})
-        if(!("subcategory" in data)) return res.status(400).send({status:false,msg:"Pls Enter subcategory, Its Required"})
-        if(!("releasedAt" in data)) return res.status(400).send({status:false,msg:"Pls Enter releasedAt, Its Required"})
+        if(!("title" in data)) return res.status(400).send({status:false,message:"Pls Enter Title, Its Required"})
+        if(!("excerpt" in data)) return res.status(400).send({status:false,message:"Pls Enter excerpt, Its Required"})
+        if(!("ISBN" in data)) return res.status(400).send({status:false,message:"Pls Enter ISBN, Its Required"})
+        if(!("category" in data)) return res.status(400).send({status:false,message:"Pls Enter category, Its Required"})
+        if(!("subcategory" in data)) return res.status(400).send({status:false,message:"Pls Enter subcategory, Its Required"})
+        if(!("releasedAt" in data)) return res.status(400).send({status:false,message:"Pls Enter releasedAt, Its Required"})
         
 
         if(!isValid(title)) return res.status(400).send({status : false, message : 'please enter title'})
@@ -62,7 +62,7 @@ const getBooks= async function(req,res){
 
     const filter={isDeleted:false}
     if(userId){
-        if(!isValid(userId)) return res.status(400).send({status:false,message:"Dont Left AuthorId empty"})
+        // if(userId.valueOf()=="") return res.status(400).send({status:false,message:"Dont Left AuthorId empty"})
         if(!isValidObjectId(userId))return res.status(400).send({status:false,messsage:"Pls Enter UserId in Valid Format"})
         if(await booksModel.findOne({_id:userId})) return res.status(400).send({status:false,message:"Dont Give BookId Give only UserId"})
         if(!(await userModel.findById(userId))) return res.status(400).send({status:false,message:"This UserId DoesNot Exists"})
@@ -76,7 +76,7 @@ const getBooks= async function(req,res){
         if(!isValid(subcategory)) return res.status(400).send({status:false,message:"Dont Left subcategory Empty"})
         filter.subcategory={$all:subcategory.trim().split(",").map(e=>e.trim())}
     }
-    let data=await booksModel.find({filter,$orderby: { title : 1 }})
+    let data=await booksModel.find(filter).sort({title:1})
     if(data.length==0) {return res.status(400).send({status:false,message:"Sorry No Books Found"})}
     else{return res.status(200).send({status:true,message:"Books list",data:data})}
 }
