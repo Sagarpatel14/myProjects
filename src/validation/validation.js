@@ -4,6 +4,10 @@ const isValid= function(value){
     if(value==null)return false 
     return true
 }
+const isValidBody=(body)=>{
+    if(Object.keys(body).length==0)
+    return true
+}
 const isValidName=(name)=>{
     if( /^[-a-zA-Z_:,.' ']{1,100}$/.test(name))
     return true
@@ -17,11 +21,19 @@ const isValidMobile=(mobile)=>{
     return true
 }
 const isValidPassword=(pw)=>{
-    if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,10}$/.test(pw))
+    if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,15}$/.test(pw))
     return true
 }
 const isValidIsbn=(no)=>{
     if(/^(ISBN[-]*(1[03])*[ ]*(: ){0,1})*(([0-9Xx][- ]*){13}|([0-9Xx][- ]*)){10}/.test(no))
     return true
 }
-module.exports={isValid,isValidName,isValidEmail,isValidMobile,isValidFName,isValidUrl,isValidPassword,isValidIsbn}
+const isValidTitle=(title)=>{
+    if(title =="Mr" || title=="Mrs" || title=="Miss")
+    return true
+}
+const isValidPincode=(pin)=>{
+    if(/^[1-9][0-9]{5}$/.test(pin))
+    return true
+}
+module.exports={isValid,isValidName,isValidEmail,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode}
