@@ -1,7 +1,7 @@
+const { default: mongoose } = require('mongoose');
 const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
-const reviewModel=require("../models/reviewModel")
-const {isValid,isValidIsbn, isValidDate,isValidObjectId,isValidBody} = require('../validation/validation')
+const { isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody } = require('../validation/validation')
 
 //——————————————————————————————Create Books———————————————————————————————————————————————————————————————————————————————————
 const createBooks = async function (req, res) {
@@ -39,8 +39,7 @@ const createBooks = async function (req, res) {
         if (!checkUserId) return res.status(400).send({ status: false, message: 'this user id does not exist' })
 
         let saveData = await booksModel.create(data)
-      
-        res.status(201).send({status : true, message : 'success', data : saveData})
+        res.status(201).send({ status: true, message: 'success', data: saveData })
     }
     catch (err) {
         console.log(err)
@@ -48,11 +47,10 @@ const createBooks = async function (req, res) {
     }
 }
 //—————————————————————————————— Get Books———————————————————————————————————————
-
-const getBooks= async function(req,res){
-try{    
-    const query=req.query
-    const{userId,category,subcategory}=query
+const getBooks = async function (req, res) {
+    try {
+        const query = req.query
+        const { userId, category, subcategory } = query
 
         const filter = { isDeleted: false }
         if (userId) {
@@ -116,23 +114,4 @@ const deleteBooks = async function (req, res) {
 
 }
 
-
-//—————————————————————————————— getBooksByParamsId———————————————————————————————————————
-
-const getBooksByParamsId=async function(req,res){
-    const iD= req.params.bookId
-    if(!isValidObjectId(iD)) return res.status(400).send({status:false,message:"Pls Enter BookId In Valid Format"})
-    if(await userModel.findById(iD)) return res.status(400).send({status:false,message:"Dont Add UserId Add Only BookId"})
-    if(await reviewModel.findById(iD)) return res.status(400).send({status:false,message:"Dont Add ReviewId Add Only BookId"})
-    if(!(await booksModel.findOne({$and:[{_id:iD,isDeleted:false}]}))) return res.status(400).send({status:false,message:"This Id Doesnot Exists"})
-
-
-    let bookData=await booksModel.findById(iD).select({ISBN:0,deletedAt:0,__v:0}).lean()
-    let reviewData=await reviewModel.find({bookId:iD}).select({reviewedBy:1,bookId:1,reviewedAt:1,rating:1,review:1})
-    bookData.reviewsData=reviewData
-    res.status(200).send({status:true,message: 'Books list',data:bookData})
-}
-
-
-
-module.exports = {createBooks,getBooks,getBooksByParamsId,updateBooks}
+module.exports = { createBooks, getBooks, deleteBooks }
