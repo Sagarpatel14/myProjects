@@ -135,4 +135,4 @@ const getBooksByParamsId=async function(req,res){
 
 
 
-module.exports = {createBooks,getBooks,getBooksByParamsId,updateBooks}
+module.exports = {createBooks,getBooks,getBooksByParamsId,deleteBooks}
