@@ -17,8 +17,9 @@ router.route('/books')
 router.route("/books/:bookId")
 .get(booksController.getBooksByParamsId)
 
-router.post("/books/:bookId/review",reviewController.addReview)
-router.get("/books/:bookId",booksController.getBooksByParamsId)
+router.post("/books/:bookId/review",mw.authe,mw.autho,reviewController.addReview)
+router.get("/books/:bookId",mw.authe,booksController.getBooksByParamsId)
 
+router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
 
 module.exports=router
