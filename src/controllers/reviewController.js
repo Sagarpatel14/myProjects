@@ -33,7 +33,16 @@ let updateReview = async function(req, res){
         if (!isValid(review)) return res.status(400).send({ status: false, message: "Don't left review Empty" })
 
         if(book && book.isDeleted == false){
-            
+            if(reviewedBy){
+                if(!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
+                reviews.reviewedBy = reviewedBy
+            }
+
+            if(rating){
+                if(!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
+                reviews.reviewedBy = reviewedBy
+            }
+
         }
 
        
