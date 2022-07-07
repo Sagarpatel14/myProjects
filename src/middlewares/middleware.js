@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken")
 const userModel = require('../models/userModel')
+const mongoose=require("mongoose")
 const authe = async function (req, res, next) {
     try {
         let token = req.headers["x-api-key"]
@@ -26,8 +27,17 @@ const autho= async function(req,res,next){
     let decodeToken = jwt.verify(token, "project-3@sss#group61")
     if (!decodeToken) return res.status(400).send({ status: false, message: "Token invalid" })
     let decodedId= decodeToken.userId
-    if(!(await userModel.findById(req.body.userId))) return res.status(400).send({status:false,message:"Pls Enter Valid UserId"})
+    if(!(req.params.bookId)){
+    if(!("userId" in req.body)) return res.status(400).send({status:false,message:"Pls Enter userId Of User at Which you want to create book"})
+    if(req.body.userId.trim().length==0) return res.status(400).send({status:false,message:"Dont Left UserId Empty"})
+    if(!(mongoose.isValidObjectId(req.body.userId))) return res.status(400).send({status:false,message:"Pls enter UserId in Valid Format"})
+    if(!(await userModel.findById(req.body.userId))) return res.status(400).send({status:false,message:"This Id Doesnot Exists"})
     if(!(req.body.userId == decodedId)) return res.status(400).send({status:false,message:"You Are Not Authorise to do this"})
+   
+    }
+    else{
+
+    }
     next()
 
 }
