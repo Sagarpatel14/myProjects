@@ -17,13 +17,11 @@ const createBooks = async function (req, res) {
         if(!("category" in data)) return res.status(400).send({status:false,message:"Pls Enter category, Its Required"})
         if(!("subcategory" in data)) return res.status(400).send({status:false,message:"Pls Enter subcategory, Its Required"})
         if(!("releasedAt" in data)) return res.status(400).send({status:false,message:"Pls Enter releasedAt, Its Required"})
-        if(!("userId" in data)) return res.status(400).send({status:false,message:"Pls Enter userId, Its Required"})
         
 
         if(!isValid(title)) return res.status(400).send({status : false, message : 'Dont left title Empty'})
         if(!isValid(excerpt)) return res.status(400).send({status : false, message : 'Dont left Excerpt Empty'})
         if(!isValid(userId)) return res.status(400).send({status : false, message : 'Dont left UserId Empty'})
-        if(!isValidObjectId(userId)) return res.status(400).send({status : false, message : 'please enter userId in valid format'})
         if(!isValid(ISBN)) return res.status(400).send({status : false, message : 'Dont left Excerpt Empty ISBN'})
         if(!isValid(category)) return res.status(400).send({status : false, message : 'please enter category Dont left Empty'})
         if(!isValid(subcategory)) return res.status(400).send({status : false, message : 'please enter subcategory Dont left Empty'})
