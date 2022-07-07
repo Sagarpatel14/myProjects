@@ -12,6 +12,7 @@ router.post("/login", userController.loginUser);
 router.post('/books',mw.authe,mw.autho, booksController.createBooks)
 //——————————————————————————————Get Books———————————————————————————————————————
 router.get("/books",booksController.getBooks)
-
+//——————————————————————————————Update Books———————————————————————————————————————
+router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
 
 module.exports=router
