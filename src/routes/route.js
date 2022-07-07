@@ -12,6 +12,7 @@ router.post("/login", userController.loginUser);
 router.post('/books',mw.authe,mw.autho, booksController.createBooks)
 //——————————————————————————————Get Books———————————————————————————————————————
 router.get("/books",booksController.getBooks)
-
+//——————————————————————————————Delete Books———————————————————————————————————————
+router.delete("/books/:bookId", mw.authe,mw.autho, booksController.deleteBooks)
 
 module.exports=router
