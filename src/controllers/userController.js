@@ -68,7 +68,7 @@ const loginUser = async function (req, res) {
         let token = jwt.sign(
             { userId: user._id.toString(), password: user.password, iat:Math.floor(new Date().getTime()/1000) },
 
-            "project-3@sss#group61", { expiresIn: 60000 }
+            "project-3@sss#group61", { expiresIn: "120s" }
         );
 
         res.status(200).send({ status: true, message: "Successfully loggedin", token: token });
