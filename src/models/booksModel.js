@@ -11,8 +11,8 @@ const bookSchema = new mongoose.Schema({
     subcategory : { type : [String], required : true, lowercase:true },
     reviews : { type : Number, default : 0, comment :Number },
     deletedAt  : Date,
-    isDeleted : {  type : Boolean, default: false },
-    releasedAt : { type : Date,  required : true }
+    releasedAt : { type : Date,  required : true },
+    isDeleted : {  type : Boolean, default: false }
 },{ timestamps: true });
 
 module.exports = mongoose.model('Book', bookSchema)

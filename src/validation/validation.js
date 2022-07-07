@@ -6,6 +6,15 @@ const isValid= function(value){
     if(value==null)return false 
     return true
 }
+const isValidrating=(rating)=>{
+    if (typeof rating==="string") return false
+    if(rating==null)return false
+    return true
+}
+const isValidratingLength=(rating)=>{
+    if(!(rating>=1 && rating<=5)) return false
+    return true
+}
 const isValidBody=(body)=>{
     if(Object.keys(body).length==0)
     return true
@@ -52,4 +61,4 @@ const isValidObjectId = function(ObjectId){
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-module.exports={isValid,isValidName,isValidExcerpt,isValidEmail,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode, isValidDate,isValidObjectId}
+module.exports={isValid,isValidName,isValidEmail,isValidExcerpt,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode, isValidDate,isValidObjectId,isValidrating,isValidratingLength}

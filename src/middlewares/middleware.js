@@ -1,23 +1,25 @@
 const jwt = require("jsonwebtoken")
 const userModel = require('../models/userModel')
 const mongoose = require("mongoose")
-const { isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody, isValidName, isValidExcerpt } = require('../validation/validation')
 const booksModel = require('../models/booksModel')
-
-
+const {isValidObjectId} = require('../validation/validation')
 const authe = async function (req, res, next) {
     try {
         let token = req.headers["x-api-key"]
         if (!token) req.headers["X-Api-Key"]
         if (!token) return res.status(400).send({ status: false, message: "Token must be present in header" })
-        try {
-            let decodeToken = jwt.verify(token, "project-3@sss#group61")
-            if (!decodeToken) return res.status(400).send({ status: false, message: "Token invalid" })
-        }
-        catch (err) {
-            return res.status(401).send({ status: false, message: "Token Is Expired Now Pls Regenerate it" })
-        }
-        next();
+        jwt.verify(token, "project-3@sss#group61", { ignoreExpiration: true }, function (err, decoded) {
+            if (err) { return res.status(400).send({ status: false, meessage: "token invalid" }) }
+
+            else {
+                //The static Date.now() method returns the number of milliseconds elapsed since January 1, 1970
+                if (Date.now() > decoded.exp * 1000) {
+                    return res.status(401).send({ status: false, msg: "Session Expired", });
+                }
+            }
+            req.userId = decoded.userId;
+            next();
+        });
     }
     catch (err) {
         return res.status(500).send({ status: false, message: err.message })
@@ -48,16 +50,15 @@ const autho = async function (req, res, next) {
             let book = await booksModel.findById(bookId)
             if (!book) return res.status(400).send({ status: false, message: 'sorry, No such book exists' })
             let decodedId = decodeToken.userId
-            if (book.userId != decodedId) 
+            if (book.userId != decodedId)
                 return res.status(400).send({ status: false, message: "You Are Not Authorise to update this book" })
-            }
+        }
         next()
-
-    } catch (err) {
+    }
+    catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
-
 
 
 module.exports = { authe, autho }

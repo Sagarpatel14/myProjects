@@ -121,7 +121,6 @@ const updateBooks = async function (req, res) {
         if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date, Dont leave it Empty' })
         if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date, Dont leave it Empty' })
         if (!isValid(ISBN)) return res.status(400).send({ status: false, message: 'Dont left ISBN empty' })
-
         if (book && book.isDeleted == false) {
             if (title) {
                 if (!isValidName(title)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
@@ -151,6 +150,21 @@ const updateBooks = async function (req, res) {
         res.status(500).send({ status: false, message: err.message })
     }
 }
+
+const getBooksByParamsId=async function(req,res){
+    const iD= req.params.bookId
+    if(!isValidObjectId(iD)) return res.status(400).send({status:false,message:"Pls Enter BookId In Valid Format"})
+    if(await userModel.findById(iD)) return res.status(400).send({status:false,message:"Dont Add UserId Add Only BookId"})
+    if(await reviewModel.findById(iD)) return res.status(400).send({status:false,message:"Dont Add ReviewId Add Only BookId"})
+    if(!(await booksModel.findOne({$and:[{_id:iD,isDeleted:false}]}))) return res.status(400).send({status:false,message:"This Id Doesnot Exists"})
+
+
+    let bookData=await booksModel.findById(iD).select({ISBN:0,deletedAt:0,__v:0}).lean()
+    let reviewData=await reviewModel.find({bookId:iD}).select({reviewedBy:1,bookId:1,reviewedAt:1,rating:1,review:1})
+    bookData.reviewsData=reviewData
+    res.status(200).send({status:true,message: 'Books list',data:bookData})
+}
+
        
 
         
@@ -159,11 +173,4 @@ const updateBooks = async function (req, res) {
 
         
 
-        
-
-
-
-
-
-
-module.exports = { createBooks, getBooks, updateBooks }
+module.exports = { createBooks, getBooks, updateBooks,getBooksByParamsId }
