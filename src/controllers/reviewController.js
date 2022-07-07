@@ -1,6 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const booksModel = require('../models/booksModel')
 const reviewModel = require("../models/reviewModel");
+const { updateMany } = require('../models/userModel');
 const userModel = require("../models/userModel");
 const { isValid, isValidName, isValidBody, isValidrating, isValidratingLength } = require("../validation/validation")
 
@@ -11,7 +12,7 @@ const addReview = async function (req, res) {
     let bookId = req.params.bookId
     if (!(isValidObjectId(bookId))) return res.status(400).send({ status: false, message: "Pls Enter BookId In valid Format" })
     if (await userModel.findById(bookId)) return res.status(400).send({ status: false, message: "Dont Add UserId In Params..Add only BookId" })
-    if (!(await booksModel.findOne({$and:[{_id:bookId,isDeleted:false}]})))return res.status(400).send({status:false,message:"Sorry This Id Doesnot Exists"})
+    if (!(await booksModel.findOne({$and:[{_id:bookId,isDeleted:false}]}))) return res.status(400).send({status:false,message:"Sorry This Id Doesnot Exists"})
     let body = req.body
     const { review, rating, reviewedBy } = body
     if (isValidBody(body)) return res.status(400).send({ status: false, message: "Dont Left Body Empty" })
@@ -40,6 +41,36 @@ const addReview = async function (req, res) {
 }
 
 
+const deleteBooks = async function (req, res) {
+    try {
+        let bookId = req.params.bookId;
+        let reviewId = req.params.reviewId;
 
+        if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, messsage: "Pls Enter bookId in Valid Format" })
+        if (await userModel.findOne({ _id: bookId })) return res.status(400).send({ status: false, message: "Dont Give UserId Give only BookId" })
+        if (!(await booksModel.findById(bookId))) return res.status(400).send({ status: false, message: "This BookId Doesn't Exist" })
 
-module.exports = { addReview }
+        if (!isValidObjectId(reviewId)) return res.status(400).send({ status: false, messsage: "Pls Enter reviewId in Valid Format" })
+        if (await userModel.findOne({ _id: reviewId })) return res.status(400).send({ status: false, message: "Dont Give UserId Give only reviewId" })
+        if (!(await reviewModel.findById(reviewId))) return res.status(400).send({ status: false, message: "This reviewId Doesn't Exist" })
+
+        let book = await reviewModel.findOne({$and: [{bookId: bookId, _id: reviewId}]});
+        if (book.isDeleted == true) return res.status(400).send({ status: false, message: "This book is already deleted" });
+        if (!book) return res.status(404).send({ status: false, message: "Book not found" });
+        let deletedBook = await reviewModel.updateMany({isDeleted: true}, {new: true})
+        let review = booksModel.findOne({_id: bookId})
+        let count = review.reviews;
+        count= count - 1;
+        // blogData = req.body
+        await booksModel.findOneAndUpdate({_id:bookId}, {$set:{reviews: count}})
+
+        res.status(200).send({ status: true, message: "Success", data: deletedBook });
+
+    } catch (err) {
+        console.log("This is the error:", err.message)
+        res.status(500).send({ message: "Error", error: err.message })
+    }
+
+}
+
+module.exports = { addReview, deleteBooks }

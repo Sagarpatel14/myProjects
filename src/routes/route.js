@@ -9,7 +9,7 @@ const mw=require("../middlewares/middleware")
 router.post("/register",userController.createUser)
 //——————————————————————————————Login User———————————————————————————————————————
 router.post("/login", userController.loginUser);
-//——————————————————————————————Create Books or Get Books———————————————————————————————————————
+//——————————————————————————————Create Books or Get Books————————
 router.route('/books')                 
 .post(mw.authe,mw.autho, booksController.createBooks)
 .get(booksController.getBooks)   
@@ -20,6 +20,10 @@ router.route("/books/:bookId")
 router.post("/books/:bookId/review",mw.authe,mw.autho,reviewController.addReview)
 router.get("/books/:bookId",mw.authe,booksController.getBooksByParamsId)
 
-router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
+// router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
+
+router.delete("/books/:bookId",mw.authe,mw.autho,reviewController.deleteBooks)
+
+router.delete("/books/:bookId/review/:reviewId",mw.authe,mw.autho,reviewController.deleteBooks)
 
 module.exports=router
