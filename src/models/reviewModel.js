@@ -7,7 +7,7 @@ const reviewSchema = new mongoose.Schema(
   
       reviewedBy: {type: String, required: true, default: 'guest',  value: ""},
   
-      reviewedAt: { type: "" ,required: true },
+      reviewedAt: { type: "" , required: true },
   
       rating: {type: Number, required: true, },
 

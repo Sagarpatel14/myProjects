@@ -3,7 +3,7 @@ const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
 const { isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody } = require('../validation/validation')
 
-//——————————————————————————————Create Books———————————————————————————————————————
+//——————————————————————————————Create Books———————————————————————————————————————————————————————————————————————————————————
 const createBooks = async function (req, res) {
     try {
         let data = req.body;
@@ -100,9 +100,6 @@ const deleteBooks = async function (req, res) {
         let book = await booksModel.findById(bookId);
         if (book.isDeleted == true) return res.status(400).send({ status: false, message: "This book is already deleted" });
         if (!book) return res.status(404).send({ status: false, message: "Book not found" })
-
-        
-
         // blogData = req.body
         let deletedBook = await booksModel.findOneAndUpdate({ _id: bookId }, {
             $set: { isDeleted: true, deletedAt: Date() }
