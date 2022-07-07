@@ -17,16 +17,17 @@ const createBooks = async function (req, res) {
         if(!("category" in data)) return res.status(400).send({status:false,message:"Pls Enter category, Its Required"})
         if(!("subcategory" in data)) return res.status(400).send({status:false,message:"Pls Enter subcategory, Its Required"})
         if(!("releasedAt" in data)) return res.status(400).send({status:false,message:"Pls Enter releasedAt, Its Required"})
+        if(!("userId" in data)) return res.status(400).send({status:false,message:"Pls Enter userId, Its Required"})
         
 
-        if(!isValid(title)) return res.status(400).send({status : false, message : 'please enter title'})
-        if(!isValid(excerpt)) return res.status(400).send({status : false, message : 'please enter excerpt'})
-        if(!isValid(userId)) return res.status(400).send({status : false, message : 'please enter userId'})
+        if(!isValid(title)) return res.status(400).send({status : false, message : 'Dont left title Empty'})
+        if(!isValid(excerpt)) return res.status(400).send({status : false, message : 'Dont left Excerpt Empty'})
+        if(!isValid(userId)) return res.status(400).send({status : false, message : 'Dont left UserId Empty'})
         if(!isValidObjectId(userId)) return res.status(400).send({status : false, message : 'please enter userId in valid format'})
-        if(!isValid(ISBN)) return res.status(400).send({status : false, message : 'please enter ISBN'})
-        if(!isValid(category)) return res.status(400).send({status : false, message : 'please enter category'})
-        if(!isValid(subcategory)) return res.status(400).send({status : false, message : 'please enter subcategory'})
-        if(!isValid(releasedAt)) return res.status(400).send({status : false, message : 'please enter release date'})
+        if(!isValid(ISBN)) return res.status(400).send({status : false, message : 'Dont left Excerpt Empty ISBN'})
+        if(!isValid(category)) return res.status(400).send({status : false, message : 'please enter category Dont left Empty'})
+        if(!isValid(subcategory)) return res.status(400).send({status : false, message : 'please enter subcategory Dont left Empty'})
+        if(!isValid(releasedAt)) return res.status(400).send({status : false, message : 'please enter release date Dont left Empty'})
         if(!isValidIsbn(ISBN)) return res.status(400).send({status : false, message : 'please enter valid ISBN'})
         if(!isValidDate(releasedAt)) return res.status(400).send({status : false, message : "please enter the date in 'YYYY-MM-DD' format" })
 
@@ -48,21 +49,13 @@ const createBooks = async function (req, res) {
     }
 }
 //—————————————————————————————— Get Books———————————————————————————————————————
-// Returns all books in the collection that aren't deleted. Return only book _id, title, excerpt, userId, category, releasedAt, reviews field. Response example here
-// Return the HTTP status 200 if any documents are found. The response structure should be like this
-// If no documents are found then return an HTTP status 404 with a response like this
-// Filter books list by applying filters. Query param can have any combination of below filters.
-// By userId
-// By category
-// By subcategory example of a query url: books?filtername=filtervalue&f2=fv2
-// Return all books sorted by book name in Alphabatical order
 const getBooks= async function(req,res){
+try{    
     const query=req.query
     const{userId,category,subcategory}=query
 
     const filter={isDeleted:false}
     if(userId){
-        // if(userId.valueOf()=="") return res.status(400).send({status:false,message:"Dont Left AuthorId empty"})
         if(!isValidObjectId(userId))return res.status(400).send({status:false,messsage:"Pls Enter UserId in Valid Format"})
         if(await booksModel.findOne({_id:userId})) return res.status(400).send({status:false,message:"Dont Give BookId Give only UserId"})
         if(!(await userModel.findById(userId))) return res.status(400).send({status:false,message:"This UserId DoesNot Exists"})
@@ -77,8 +70,21 @@ const getBooks= async function(req,res){
         filter.subcategory={$all:subcategory.trim().split(",").map(e=>e.trim())}
     }
     let data=await booksModel.find(filter).sort({title:1})
+    //titl=data.title
+    // for(let i=0;i<data.length;i++){
+
+    //     var text = data[i].title
+    //     .split(' ')
+    //     .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    //     .join(' ');   
+    //     titl=text
+    // }
+    // console.log(titl)
     if(data.length==0) {return res.status(400).send({status:false,message:"Sorry No Books Found"})}
     else{return res.status(200).send({status:true,message:"Books list",data:data})}
 }
-
+catch(err){
+    res.status(500).send({status:false,message:err.message})
+}
+}
 module.exports = {createBooks,getBooks}
