@@ -9,7 +9,7 @@ const mw=require("../middlewares/middleware")
 router.post("/register",userController.createUser)
 //——————————————————————————————Login User———————————————————————————————————————
 router.post("/login", userController.loginUser);
-//——————————————————————————————Create Books or Get Books———————————————————————————————————————
+//——————————————————————————————Create Books or Get Books————————
 router.route('/books')                 
 .post(mw.authe,mw.autho, booksController.createBooks)
 .get(booksController.getBooks)
