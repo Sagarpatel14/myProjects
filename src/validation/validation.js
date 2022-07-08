@@ -61,4 +61,4 @@ const isValidObjectId = function(ObjectId){
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-module.exports={isValid,isValidName,isValidEmail,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode, isValidDate,isValidObjectId,isValidrating,isValidratingLength}
+module.exports={isValid,isValidName,isValidEmail,isValidExcerpt,isValidMobile,isValidPassword,isValidIsbn,isValidBody,isValidTitle,isValidPincode, isValidDate,isValidObjectId,isValidrating,isValidratingLength}

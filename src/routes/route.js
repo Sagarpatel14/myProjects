@@ -12,15 +12,13 @@ router.post("/login", userController.loginUser);
 //——————————————————————————————Create Books or Get Books————————
 router.route('/books')                 
 .post(mw.authe,mw.autho, booksController.createBooks)
-.get(booksController.getBooks)   
-
-router.route("/books/:bookId")
-.get(booksController.getBooksByParamsId)
-
+.get(booksController.getBooks)
 router.post("/books/:bookId/review",mw.authe,mw.autho,reviewController.addReview)
 router.get("/books/:bookId",mw.authe,booksController.getBooksByParamsId)
 
-// router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
+router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
+router.put('/books/:bookId/review/:reviewId',mw.authe,mw.autho, booksController.updateBooks)
+
 
 router.delete("/books/:bookId",mw.authe,mw.autho,reviewController.deleteBooks)
 
