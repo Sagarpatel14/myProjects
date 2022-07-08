@@ -20,9 +20,9 @@ router.post("/books/:bookId/review",mw.authe,mw.autho,reviewController.addReview
 //—————————————————————— Update Book By BookId  ————————————————————————————————
 router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
 //—————————————————————— Update Review By BookId and ReviewID ————————————————————————————————
-router.put('/books/:bookId/review/:reviewId',mw.authe,mw.autho, booksController.updateBooks)
+router.put('/books/:bookId/review/:reviewId',mw.authe,mw.autho, reviewController.updateReview)
 //—————————————————————— Delete Book By BookId ————————————————————————————————
-router.delete("/books/:bookId",mw.authe,mw.autho,reviewController.deleteBooks)
+router.delete("/books/:bookId",mw.authe,mw.autho,booksController.deleteBooks)
 //—————————————————————— Delete Review by BookId and ReviewId ————————————————————————————————
 router.delete("/books/:bookId/review/:reviewId",mw.authe,mw.autho,reviewController.deleteReview)
 
