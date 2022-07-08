@@ -24,6 +24,6 @@ router.put('/books/:bookId/review/:reviewId', mw.authe, mw.autho, reviewControll
 //—————————————————————— Delete Book By BookId ————————————————————————————————
 router.delete("/books/:bookId", mw.authe, mw.autho, booksController.deleteBooks)
 //—————————————————————— Delete Review by BookId and ReviewId ————————————————————————————————
-router.delete("/books/:bookId/review/:reviewId", mw.authe, mw.autho, reviewController.deleteReview)
+router.delete("/books/:bookId/review/:reviewId", reviewController.deleteReview)
 
 module.exports = router

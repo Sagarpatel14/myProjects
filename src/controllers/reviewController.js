@@ -112,24 +112,35 @@ const deleteReview = async function (req, res) {
         let reviewId = req.params.reviewId;
 
         if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, messsage: "Pls Enter bookId in Valid Format" })
+        // Checking if User Give UserId instead of BookId
         if (await userModel.findOne({ _id: bookId })) return res.status(400).send({ status: false, message: "Dont Give UserId Give only BookId" })
+        // Checking if User Give ReviewId instead of BookId
+        if(await reviewModel.findOne({_id: bookId})) return res.status(400).send({ status: false, message: "Dont Give reviewId on the place of bookId" })
+        // Check whether book is deleted or not
+        let checkBookDeleted = await booksModel.findById(bookId)
+        if(checkBookDeleted.isDeleted == true) return res.status(400).send({status: false, message: "Sorry, this book is deleted"})
         if (!(await booksModel.findById(bookId))) return res.status(400).send({ status: false, message: "This BookId Doesn't Exist" })
 
         if (!isValidObjectId(reviewId)) return res.status(400).send({ status: false, messsage: "Pls Enter reviewId in Valid Format" })
-        if (await userModel.findOne({ _id: reviewId })) return res.status(400).send({ status: false, message: "Dont Give UserId Give only reviewId" })
+        // Checking if User Give UserId instead of ReviewId
+        if (await userModel.findOne({ _id: reviewId })) return res.status(400).send({ status: false, message: "Dont Give UserId on the place of reviewId" })
+        // Checking if User Give BookId instead of ReviewId
+        if(await booksModel.findOne({_id: reviewId})) return res.status(400).send({ status: false, message: "Dont Give bookId on the place of reviewId" })
+        // 
+        
         if (!(await reviewModel.findById(reviewId))) return res.status(400).send({ status: false, message: "This reviewId Doesn't Exist" })
 
-        let book = await reviewModel.findOne({ $and: [{ bookId: bookId, _id: reviewId }] });
-        if (book.isDeleted == true) return res.status(400).send({ status: false, message: "This book is already deleted" });
-        if (!book) return res.status(404).send({ status: false, message: "Book not found" });
-        let deletedBook = await reviewModel.updateMany({ isDeleted: true }, { new: true })
-        let review = booksModel.findOne({ _id: bookId })
-        let count = review.reviews;
+        let findReview = await reviewModel.findOne({ $and: [{ bookId: bookId, _id: reviewId }] });
+        if (findReview.isDeleted == true) return res.status(400).send({ status: false, message: "This review is already deleted" });
+        if (!findReview) return res.status(404).send({ status: false, message: "Review not found" });
+        let deleteReview = await reviewModel.findOneAndUpdate({_id:reviewId},{ isDeleted: true }, { new: true })
+        let updateReview = await booksModel.findOne({ _id: bookId })
+        let count = updateReview.reviews;
         count = count - 1;
-        // blogData = req.body
+        
         await booksModel.findOneAndUpdate({ _id: bookId }, { $set: { reviews: count } })
 
-        res.status(200).send({ status: true, message: "Success", data: deletedBook });
+        res.status(200).send({ status: true, message: "Success", data: deleteReview });
 
     } catch (err) {
         console.log("This is the error:", err.message)
