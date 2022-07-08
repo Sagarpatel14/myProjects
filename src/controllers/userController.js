@@ -57,16 +57,16 @@ const loginUser = async function (req, res) {
 
         if (!("email" in body)) return res.status(400).send({ status: false, message: "please enter email" });
         if (!("password" in body)) return res.status(400).send({ status: false, message: "please enter password" });
-       
+
         if (!isValid(email)) return res.status(400).send({ status: false, message: "email should not be empty" })
         if (!isValid(password)) return res.status(400).send({ status: false, message: "Password should not be empty" })
-       
+
         let user = await userModel.findOne({ email: email, password: password });
 
         if (!user) return res.status(400).send({ status: false, message: "Please use valid credentials" })
 
         let token = jwt.sign(
-            { userId: user._id.toString(), password: user.password, iat:Math.floor(new Date().getTime()/1000) },
+            { userId: user._id.toString(), password: user.password, iat: Math.floor(new Date().getTime() / 1000) },
 
             "project-3@sss#group61", { expiresIn: "120s" }
         );
