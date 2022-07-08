@@ -108,7 +108,6 @@ const updateBooks = async function (req, res) {
         if (!isValid(title)) return res.status(400).send({ status: false, message: "Don't left title Empty" })
         if (!isValid(excerpt)) return res.status(400).send({ status: false, message: "Don't left Excerpt Empty" })
         if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date, Dont leave it Empty' })
-        if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date, Dont leave it Empty' })
         if (!isValid(ISBN)) return res.status(400).send({ status: false, message: 'Dont left ISBN empty' })
         if (book && book.isDeleted == false) {
             if (title) {
@@ -140,6 +139,36 @@ const updateBooks = async function (req, res) {
     }
 }
 
+
+//——————————————————————————————Delete Books———————————————————————————————————————
+
+const deleteBooks = async function (req, res) {
+    try {
+        let bookId = req.params.bookId;
+
+        if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, messsage: "Pls Enter bookId in Valid Format" })
+        if (await userModel.findOne({ _id: bookId })) return res.status(400).send({ status: false, message: "Dont Give UserId Give only BookId" })
+        if (!(await booksModel.findById(bookId))) return res.status(400).send({ status: false, message: "This BookId Doesn't Exist" })
+
+        let book = await booksModel.findById(bookId);
+        if (book.isDeleted == true) return res.status(400).send({ status: false, message: "This book is already deleted" });
+        if (!book) return res.status(404).send({ status: false, message: "Book not found" })
+        // blogData = req.body
+        let deletedBook = await booksModel.findOneAndUpdate({ _id: bookId }, {
+            $set: { isDeleted: true, deletedAt: Date() }
+        }, { new: true });
+
+        res.status(200).send({ status: true, message: "Success", data: deletedBook });
+        
+    } catch (err) {
+        console.log("This is the error:", err.message)
+        res.status(500).send({ message: "Error", error: err.message })
+    }
+
+}
+
+//—————————————————————————————— getBooksByParamsId———————————————————————————————————————
+
 const getBooksByParamsId=async function(req,res){
     const iD= req.params.bookId
     if(!isValidObjectId(iD)) return res.status(400).send({status:false,message:"Pls Enter BookId In Valid Format"})
@@ -162,4 +191,4 @@ const getBooksByParamsId=async function(req,res){
 
         
 
-module.exports = { createBooks, getBooks, updateBooks,getBooksByParamsId }
+module.exports = { createBooks, getBooks, updateBooks,getBooksByParamsId,deleteBooks }
