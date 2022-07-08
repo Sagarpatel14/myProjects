@@ -9,19 +9,21 @@ const mw=require("../middlewares/middleware")
 router.post("/register",userController.createUser)
 //——————————————————————————————Login User———————————————————————————————————————
 router.post("/login", userController.loginUser);
-//——————————————————————————————Create Books or Get Books————————
-router.route('/books')                 
-.post(mw.authe,mw.autho, booksController.createBooks)
-.get(booksController.getBooks)
-router.post("/books/:bookId/review",mw.authe,mw.autho,reviewController.addReview)
+//——————————————————————————————Create Books 
+router.post('/books',mw.authe,mw.autho, booksController.createBooks)                 
+//—————————————————————— Get Books ————————————————————————————————
+router.get('/books',mw.authe,booksController.getBooks)
+//—————————————————————— Get Books By ParamsId ————————————————————————————————
 router.get("/books/:bookId",mw.authe,booksController.getBooksByParamsId)
-
+//—————————————————————— Post Review  ————————————————————————————————
+router.post("/books/:bookId/review",mw.authe,mw.autho,reviewController.addReview)
+//—————————————————————— Update Book By BookId  ————————————————————————————————
 router.put('/books/:bookId',mw.authe,mw.autho, booksController.updateBooks)
+//—————————————————————— Update Review By BookId and ReviewID ————————————————————————————————
 router.put('/books/:bookId/review/:reviewId',mw.authe,mw.autho, booksController.updateBooks)
-
-
+//—————————————————————— Delete Book By BookId ————————————————————————————————
 router.delete("/books/:bookId",mw.authe,mw.autho,reviewController.deleteBooks)
-
-router.delete("/books/:bookId/review/:reviewId",mw.authe,mw.autho,reviewController.deleteBooks)
+//—————————————————————— Delete Review by BookId and ReviewId ————————————————————————————————
+router.delete("/books/:bookId/review/:reviewId",mw.authe,mw.autho,reviewController.deleteReview)
 
 module.exports=router
