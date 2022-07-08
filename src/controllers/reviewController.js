@@ -60,7 +60,7 @@ const deleteBooks = async function (req, res) {
         let deletedBook = await reviewModel.updateMany({isDeleted: true}, {new: true})
         let review = booksModel.findOne({_id: bookId})
         let count = review.reviews;
-        count= count - 1;
+        count = count - 1;
         // blogData = req.body
         await booksModel.findOneAndUpdate({_id:bookId}, {$set:{reviews: count}})
 
