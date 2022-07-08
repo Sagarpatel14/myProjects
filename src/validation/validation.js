@@ -23,6 +23,10 @@ const isValidName = (name) => {
     if (/^[-a-zA-Z_:,.' ']{1,100}$/.test(name))
         return true
 }
+const isValidTName = (name) => {
+    if (/^[A-Za-z ]+[A-Za-z0-9\u00C0-\u017F-' ]*$/.test(name))
+        return true
+}
 const isValidExcerpt = (ex) => {
     if (/^[a-zA-Z0-9_ ]*$/.test(ex))
         return true
@@ -61,4 +65,4 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-module.exports = { isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength }
+module.exports = { isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength,isValidTName}
