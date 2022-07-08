@@ -4,6 +4,8 @@ const userModel = require('../models/userModel')
 const { isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody } = require('../validation/validation')
 
 //——————————————————————————————Create Books———————————————————————————————————————————————————————————————————————————————————
+
+
 const createBooks = async function (req, res) {
     try {
         let data = req.body;
@@ -46,6 +48,7 @@ const createBooks = async function (req, res) {
         res.status(500).send({ status: false, message: err.message })
     }
 }
+
 //—————————————————————————————— Get Books———————————————————————————————————————
 const getBooks = async function (req, res) {
     try {
@@ -68,16 +71,7 @@ const getBooks = async function (req, res) {
             filter.subcategory = { $all: subcategory.trim().split(",").map(e => e.trim()) }
         }
         let data = await booksModel.find(filter).sort({ title: 1 })
-        //titl=data.title
-        // for(let i=0;i<data.length;i++){
 
-        //     var text = data[i].title
-        //     .split(' ')
-        //     .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        //     .join(' ');   
-        //     titl=text
-        // }
-        // console.log(titl)
         if (data.length == 0) { return res.status(400).send({ status: false, message: "Sorry No Books Found" }) }
         else { return res.status(200).send({ status: true, message: "Books list", data: data }) }
     } catch (err) {
@@ -85,6 +79,29 @@ const getBooks = async function (req, res) {
         res.status(500).send({ message: "Error", error: err.message })
     }
 }
+
+
+//—————————————————————————————— getBooksByParamsId———————————————————————————————————————
+
+const getBooksByParamsId = async function (req, res) {
+    try {
+        const iD = req.params.bookId
+        if (!isValidObjectId(iD)) return res.status(400).send({ status: false, message: "Pls Enter BookId In Valid Format" })
+        if (await userModel.findById(iD)) return res.status(400).send({ status: false, message: "Dont Add UserId Add Only BookId" })
+        if (await reviewModel.findById(iD)) return res.status(400).send({ status: false, message: "Dont Add ReviewId Add Only BookId" })
+        if (!(await booksModel.findOne({ $and: [{ _id: iD, isDeleted: false }] }))) return res.status(400).send({ status: false, message: "This Id Doesnot Exists" })
+
+
+        let bookData = await booksModel.findById(iD).select({ ISBN: 0, deletedAt: 0, __v: 0 }).lean()
+        let reviewData = await reviewModel.find({ bookId: iD }).select({ reviewedBy: 1, bookId: 1, reviewedAt: 1, rating: 1, review: 1 })
+        bookData.reviewsData = reviewData
+        res.status(200).send({ status: true, message: 'Books list', data: bookData })
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+    }
+}
+
 
 
 //——————————————————————————————Delete Books———————————————————————————————————————
@@ -106,7 +123,7 @@ const deleteBooks = async function (req, res) {
         }, { new: true });
 
         res.status(200).send({ status: true, message: "Success", data: deletedBook });
-        
+
     } catch (err) {
         console.log("This is the error:", err.message)
         res.status(500).send({ message: "Error", error: err.message })
@@ -115,22 +132,6 @@ const deleteBooks = async function (req, res) {
 }
 
 
-//—————————————————————————————— getBooksByParamsId———————————————————————————————————————
-
-const getBooksByParamsId=async function(req,res){
-    const iD= req.params.bookId
-    if(!isValidObjectId(iD)) return res.status(400).send({status:false,message:"Pls Enter BookId In Valid Format"})
-    if(await userModel.findById(iD)) return res.status(400).send({status:false,message:"Dont Add UserId Add Only BookId"})
-    if(await reviewModel.findById(iD)) return res.status(400).send({status:false,message:"Dont Add ReviewId Add Only BookId"})
-    if(!(await booksModel.findOne({$and:[{_id:iD,isDeleted:false}]}))) return res.status(400).send({status:false,message:"This Id Doesnot Exists"})
 
 
-    let bookData=await booksModel.findById(iD).select({ISBN:0,deletedAt:0,__v:0}).lean()
-    let reviewData=await reviewModel.find({bookId:iD}).select({reviewedBy:1,bookId:1,reviewedAt:1,rating:1,review:1})
-    bookData.reviewsData=reviewData
-    res.status(200).send({status:true,message: 'Books list',data:bookData})
-}
-
-
-
-module.exports = {createBooks, getBooks, getBooksByParamsId, deleteBooks}
+module.exports = { createBooks, getBooks, getBooksByParamsId, deleteBooks }
