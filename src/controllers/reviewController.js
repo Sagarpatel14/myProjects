@@ -16,7 +16,7 @@ let updateReview = async function (req, res) {
         let reviewId = req.params.reviewId;
         if (!reviewId) return res.status(400).send({ status: false, message: 'pls give a review id in params' })
         if (!isValidObjectId(reviewId)) return res.status(400).send({ status: false, message: 'pls give a valid review id in params' })
-        let reviews = await booksModel.findById(bookId)
+        let reviews = await booksModel.findById(reviewId)
         if (!reviews) return res.status(400).send({ status: false, message: 'sorry, No such review exists' })
 
         let body = req.body;
@@ -34,14 +34,14 @@ let updateReview = async function (req, res) {
 
         if (book && book.isDeleted == false) {
             if (reviewedBy) {
-                if (!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
+                if (!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid reviewers name" })
                 reviews.reviewedBy = reviewedBy
             }
 
             if (rating) {
                 if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
                 if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5" })
-                reviews.reviewedBy = reviewedBy
+                reviews.rating = rating
             }
 
             if (review) {
@@ -50,7 +50,7 @@ let updateReview = async function (req, res) {
             reviews.save();
             return res.status(200).send({ status: true, data: reviews })
         } else {
-            return res.status(404).send({ satus: false, message: 'No such book found' })
+            return res.status(404).send({ satus: false, message: 'No such book found or deleted' })
         }
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })

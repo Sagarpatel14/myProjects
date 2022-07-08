@@ -112,7 +112,6 @@ const updateBooks = async function (req, res) {
         if (!("title" in body)) return res.status(400).send({ status: false, message: "Pls Enter Title, Its Required" })
         if (!("excerpt" in body)) return res.status(400).send({ status: false, message: "Pls Enter excerpt, Its Required" })
         if (!("releasedAt" in body)) return res.status(400).send({ status: false, message: "Pls Enter releasedAt, Its Required" })
-        if (!("releasedAt" in body)) return res.status(400).send({ status: false, message: "Pls Enter releasedAt, Its Required" })
         if (!("ISBN" in body)) return res.status(400).send({ status: false, message: "Pls Enter ISBN, Its Required" })
 
 
@@ -143,7 +142,7 @@ const updateBooks = async function (req, res) {
             book.save()
             return res.status(200).send({ status: true, data: book })
         } else {
-            return res.status(404).send({ satus: false, message: 'No such book found' })
+            return res.status(404).send({ satus: false, message: 'No such book found or deleted' })
         }
     }
     catch (err) {
