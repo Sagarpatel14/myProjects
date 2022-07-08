@@ -50,16 +50,31 @@ const addReview = async function (req, res) {
 let updateReview = async function (req, res) {
     try {
         let bookId = req.params.bookId;
+        //check book id is present in params or not 
         if (!bookId) return res.status(400).send({ status: false, message: 'pls give a book id in params' })
         if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, message: 'pls give a valid book id in params' })
-        let book = await booksModel.findById(bookId)
-        if (!book) return res.status(400).send({ status: false, message: 'sorry, No such book exists' })
-
+        //check whether the user gave userId instead of bookId
+        if(await userModel.findById(bookId)) return res.status(400).send({ status: false, message: ' Pls give bookId instead of userId' })
+        //check whether the user gave reviewId instead of bookId
+        if(await reviewModel.findOne({_id : bookId})) return res.status(400).send({ status: false, message: ' Pls give bookId instead of reviewId' })
+        let bookData = await booksModel.findById(bookId)
+        //checking whether the boook is deleted or not 
+        if(bookData.isDeleted==true) return res.status(400).send({status: false,message:'this book is already deleted'})
+        if(!bookData) return res.status(400).send({status: false,message:'this bookId does not exist'})
+    
         let reviewId = req.params.reviewId;
+         //check review id is present in params or not 
         if (!reviewId) return res.status(400).send({ status: false, message: 'pls give a review id in params' })
         if (!isValidObjectId(reviewId)) return res.status(400).send({ status: false, message: 'pls give a valid review id in params' })
-        let reviews = await booksModel.findById(reviewId)
-        if (!reviews) return res.status(400).send({ status: false, message: 'sorry, No such review exists' })
+        //check whether the user gave userId instead of reviewId
+        if(await userModel.findOne({_id :reviewId })) return res.status(400).send({status:false, message:'Pls give reviewId instead of userId'})
+         //check whether the user gave bookId instead of reviewId
+        if(await booksModel.findOne({_id :reviewId })) return res.status(400).send({status:false, message:'Pls give reviewId instead of bookId'})
+        let reviewData = await reviewModel.findById(reviewId)
+        if (!reviewData) return res.status(400).send({ status: false, message: 'sorry, No such review exists' })
+        
+        let findReview = await reviewModel.findOne({ $and: [{ bookId: bookId, _id: reviewId }] });
+        if (findReview.isDeleted == true) return res.status(400).send({ status: false, message: "This review is already deleted" })
 
         let body = req.body;
         let { reviewedBy, rating, review } = body;
@@ -69,32 +84,33 @@ let updateReview = async function (req, res) {
         if (!("reviewedBy" in body)) return res.status(400).send({ status: false, message: "Pls Enter reviewrs name, Its Required" })
         if (!("rating" in body)) return res.status(400).send({ status: false, message: "Pls Enter rating, Its Required" })
         if (!("review" in body)) return res.status(400).send({ status: false, message: "Pls Enter review, Its Required" })
-
+        
         if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Don't left reviewrs name Empty" })
-        if (!isValid(rating)) return res.status(400).send({ status: false, message: "Don't left rating Empty" })
+        if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
         if (!isValid(review)) return res.status(400).send({ status: false, message: "Don't left review Empty" })
 
-        if (book && book.isDeleted == false) {
             if (reviewedBy) {
                 if (!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid reviewers name" })
-                reviews.reviewedBy = reviewedBy
+                let trimmedName =reviewedBy.trim()
+                reviewData.reviewedBy = trimmedName
             }
 
             if (rating) {
                 if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
                 if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5" })
-                reviews.rating = rating
+                reviewData.rating = rating
             }
 
             if (review) {
-                reviews.review = review
+                if (!isValidName(review)) return res.status(400).send({ status: false, message: "Pls Enter Valid review in only alphabatical characters" })
+                let trimmedReview = review.trim()
+                reviewData.review = trimmedReview
             }
-            reviews.save();
-            return res.status(200).send({ status: true, data: reviews })
-        } else {
-            return res.status(404).send({ satus: false, message: 'No such book found or deleted' })
+            reviewData.save();
+            res.status(200).send({ status: true, data :reviewData  })
+
         }
-    } catch (err) {
+     catch (err) {
         return res.status(500).send({ status: false, message: err.message })
 
     }
