@@ -30,7 +30,7 @@ const createBooks = async function (req, res) {
         if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
 
         let usedTitle = await booksModel.findOne({ title: title })
-        if (usedTitle) return res.status(400).send({ status: false, message: 'title already exist' })
+        if (usedTitle) return res.status(400).send({ status: false, message: 'Title already exist' })
 
         let usedIsbn = await booksModel.findOne({ ISBN: ISBN })
         if (usedIsbn) return res.status(400).send({ status: false, message: 'ISBN already exist' })
@@ -63,23 +63,13 @@ try{
         }
         if (category) {
             if (!isValid(category)) return res.status(400).send({ status: false, message: "Dont Left Category Empty" })
-            filter.category = category.trim()
+            filter.category = category
         }
         if (subcategory) {
             if (!isValid(subcategory)) return res.status(400).send({ status: false, message: "Dont Left subcategory Empty" })
             filter.subcategory = { $all: subcategory.trim().split(",").map(e => e.trim()) }
         }
         let data = await booksModel.find(filter).sort({ title: 1 })
-        //titl=data.title
-        // for(let i=0;i<data.length;i++){
-
-        //     var text = data[i].title
-        //     .split(' ')
-        //     .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        //     .join(' ');   
-        //     titl=text
-        // }
-        // console.log(titl)
         if (data.length == 0) { return res.status(400).send({ status: false, message: "Sorry No Books Found" }) }
         else { return res.status(200).send({ status: true, message: "Books list", data: data }) }
     } catch (err) {

@@ -17,7 +17,8 @@ const authe = async function (req, res, next) {
                     return res.status(401).send({ status: false, msg: "Session Expired", });
                 }
             }
-            req.userId = decoded.userId;
+            // req.userId = decoded.userId;
+            console.log(decoded.userId)
             next();
         });
     }
