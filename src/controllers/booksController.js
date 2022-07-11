@@ -2,6 +2,7 @@ const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
 const { isValidTName,isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody, isValidName, isValidExcerpt } = require('../validation/validation')
+const { set } = require('mongoose')
 
 //——————————————————————————————Create Books———————————————————————————————————————————————————————————————————————————————————
 
@@ -48,6 +49,8 @@ const createBooks = async function (req, res) {
         let checkUserId = await userModel.findById(userId)
         if (!checkUserId) return res.status(404).send({ status: false, message: 'this user id does not exist' })
 
+        str= [...new Set(subcategory)]
+        data.subcategory=str
         let saveData = await booksModel.create(data)
         res.status(201).send({ status: true, message: 'success', data: saveData })
     }
@@ -63,8 +66,19 @@ const getBooks = async function (req, res) {
         const query = req.query
         const { userId, category, subcategory } = query
 
+        let checkInput=Object.keys(query)
+        
+        let values=["userId", "category", "subcategory"]
+        for(let i=0;i<checkInput.length;i++){
+            if(!(values.includes(checkInput[i]))){
+                return res.status(400).send({status:false,message:`Query Attributes Should be ${values}` })}}
+
+        for(let i=0;i<checkInput.length;i++){
+            if(query[checkInput[i]]==="undefined" || query[checkInput[i]].trim().length==0) return res.status(400).send({status:false,message:`Dont left the ${checkInput[i]} attribute empty`})}
+       
         const filter = { isDeleted: false }
         if (userId) {
+            if(!isValid(userId)) return res.status(400).send({status:false,message:"Dont Left UserId Attribute empty"})
             if (!isValidObjectId(userId)) return res.status(400).send({ status: false, messsage: "Pls Enter UserId in Valid Format" })
             if (await booksModel.findOne({ _id: userId })) return res.status(400).send({ status: false, message: "Dont Give BookId Give only UserId" })
             if (!(await userModel.findById(userId))) return res.status(404).send({ status: false, message: "This UserId DoesNot Exists" })
@@ -73,20 +87,20 @@ const getBooks = async function (req, res) {
         if (category) {
             if (!isValid(category)) return res.status(400).send({ status: false, message: "Dont Left Category Empty" })
             let trimcategory=category.trim().toLowerCase()
-            console.log(trimcategory)
             filter.category = trimcategory
         }
         if (subcategory) {
             if (!isValid(subcategory)) return res.status(400).send({ status: false, message: "Dont Left subcategory Empty" })
             let lower=subcategory.trim().toLowerCase()
-            
             filter.subcategory = { $all: lower.trim().split(",").map(e => e.trim()) }
         }
+        
         let data = await booksModel.find(filter).select({title:1,excerpt:1,userId:1,category:1,reviews:1,releasedAt:1}).sort({ title: 1 })
         if (data.length == 0) { return res.status(400).send({ status: false, message: "Sorry No Books Found or its deleted" }) }
         else { return res.status(200).send({ status: true, message: "Books list", data: data }) }
     }
     catch (err) {
+        console.log(err)
         res.status(500).send({ status: false, message: err.message })
     }
 }
@@ -95,6 +109,7 @@ const getBooks = async function (req, res) {
 const getBooksByParamsId = async function (req, res) {
     try {
         const iD = req.params.bookId
+        if(Object.keys(iD).length==0) return res.status(400).send({status:false,message:"Pls Provide BookId In Params"})
         if (!isValidObjectId(iD)) return res.status(400).send({ status: false, message: "Pls Enter BookId In Valid Format" })
         //——————————————————————————————Check if user give userId instead of bookid———————————————————————————————————————
         if (await userModel.findById(iD)) return res.status(400).send({ status: false, message: "Dont Add UserId Add Only BookId" })
@@ -193,7 +208,7 @@ const deleteBooks = async function (req, res) {
         res.status(200).send({ status: true, message: "Success", data: deletedBook });
 
     } catch (err) {
-        console.log("This is the error:", err.message)
+    
         res.status(500).send({ message: "Error", error: err.message })
     }
 

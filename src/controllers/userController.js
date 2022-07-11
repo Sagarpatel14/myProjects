@@ -86,7 +86,7 @@ const loginUser = async function (req, res) {
         let token = jwt.sign(
             { userId: user._id.toString(), password: user.password, iat: Math.floor(new Date().getTime() / 1000) },
 
-            "project-3@sss#group61", { expiresIn: "600s" }
+            "project-3@sss#group61", { expiresIn:"600s" }
         );
         let decode= jwt.verify(token,"project-3@sss#group61")
         let date=decode.iat

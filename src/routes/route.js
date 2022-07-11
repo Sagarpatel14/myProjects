@@ -16,7 +16,7 @@ router.get('/books', mw.authe, booksController.getBooks)
 //—————————————————————— Get Books By ParamsId ————————————————————————————————
 router.get("/books/:bookId", mw.authe, booksController.getBooksByParamsId)
 //—————————————————————— Post Review  ————————————————————————————————
-router.post("/books/:bookId/review", mw.authe, mw.autho, reviewController.addReview)
+router.post("/books/:bookId/review", mw.authe, reviewController.addReview)
 //—————————————————————— Update Book By BookId  ————————————————————————————————
 router.put('/books/:bookId', mw.authe, mw.autho, booksController.updateBook)
 //—————————————————————— Update Review By BookId and ReviewID ————————————————————————————————

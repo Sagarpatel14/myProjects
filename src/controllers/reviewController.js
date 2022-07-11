@@ -10,6 +10,8 @@ const addReview = async function (req, res) {
     try {
         let bookId = req.params.bookId
         if (!(isValidObjectId(bookId))) return res.status(400).send({ status: false, message: "Pls Enter BookId In valid Format" })
+        if (await userModel.findById(bookId)) return res.status(400).send({status:false,message:"Add only BookId instead of userId"})
+        if (await reviewModel.findOne({_id:bookId})) return res.status(400).send({status:false,message:"Add only BookId instead of reviewId"})
         
         //—————————————————————————————— check if user give userid instead of BookId———————————————————————————————————————
         
@@ -22,7 +24,10 @@ const addReview = async function (req, res) {
         if (isValidBody(body)) return res.status(400).send({ status: false, message: "Dont Left Body Empty" })
         //—————————————————————————————— Mandatory Fields checking———————————————————————————————————————
         if (!("rating" in body)) return res.status(400).send({ status: false, message: "Dont Skip rating attribute its mandatory" })
-        if (!("reviewedBy" in body)) return res.status(400).send({ status: false, message: "Dont Skip reviewedBy attribute its mandatory" })
+        if (("reviewedBy" in body)) {
+            if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Dont Left reviewedBy attribute Empty" })
+            if (!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid Name" })
+        }
         
         //—————————————————————————————— Validations———————————————————————————————————————
          if("review" in body) {
@@ -31,11 +36,13 @@ const addReview = async function (req, res) {
        }
         if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
         if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5 " })
-        if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Dont Left reviewedBy attribute Empty" })
-        if (!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid Name" })
+        
 
 
         body.bookId = bookId, body.reviewedAt = new Date().toISOString()
+        if(!("reviewedBy" in body)){
+            body.reviewedBy="Guest"
+        }
         let createdData = await reviewModel.create(body)
         let data = {
             _id: createdData._id, bookId: createdData.bookId, reviewedBy: createdData.reviewedBy, reviewedAt: createdData.reviewedAt,
@@ -43,9 +50,7 @@ const addReview = async function (req, res) {
         }
 
         let book = await booksModel.findOne({ _id: bookId })
-        let count = book.reviews
-        count = count + 1
-        await booksModel.findOneAndUpdate({ _id: bookId }, { $set: { reviews: count } })
+        await booksModel.findOneAndUpdate({ _id: bookId },  {$inc:{reviews:1}  } )
         res.status(201).send({ status: true, message: "Succefully Added", data: data })
     }
     catch (err) {
@@ -77,6 +82,7 @@ let updateReview = async function (req, res) {
         if (!reviewData) return res.status(404).send({ status: false, message: 'sorry, No such review exists' })
         
         let findReview = await reviewModel.findOne({ $and: [{ bookId: bookId, _id: reviewId }] });
+        if(!findReview) return res.status(404).send({status:false,message:"Sorry No review found With this bookId And this review id"})
         if (findReview.isDeleted == true) return res.status(400).send({ status: false, message: "This review is already deleted" })
         
         let body = req.body;
@@ -116,6 +122,7 @@ let updateReview = async function (req, res) {
 
         }
      catch (err) {
+        console.log(err)
         return res.status(500).send({ status: false, message: err.message })
 
     }
@@ -147,10 +154,7 @@ const deleteReview = async function (req, res) {
         if (!findReview) return res.status(404).send({ status: false, message: "Review not found" });
         let deleteReview = await reviewModel.findOneAndUpdate({_id:reviewId},{ isDeleted: true }, { new: true })
         let updateReview = await booksModel.findOne({ _id: bookId })
-        let count = updateReview.reviews;
-        count = count - 1;
-        
-        await booksModel.findOneAndUpdate({ _id: bookId }, { $set: { reviews: count } })
+        await booksModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: -1 } })
 
         res.status(200).send({ status: true, message: "Success", data: deleteReview });
 
