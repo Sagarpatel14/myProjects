@@ -96,7 +96,7 @@ const getBooks = async function (req, res) {
         }
         
         let data = await booksModel.find(filter).select({title:1,excerpt:1,userId:1,category:1,reviews:1,releasedAt:1}).sort({ title: 1 })
-        if (data.length == 0) { return res.status(400).send({ status: false, message: "Sorry No Books Found or its deleted" }) }
+        if (data.length == 0) { return res.status(404).send({ status: false, message: "Sorry No Books Found or its deleted" }) }
         else { return res.status(200).send({ status: true, message: "Books list", data: data }) }
     }
     catch (err) {
