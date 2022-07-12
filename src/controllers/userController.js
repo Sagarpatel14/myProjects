@@ -35,20 +35,18 @@ const createUser = async function (req, res) {
         if (!isValidPassword(password)) return res.status(400).send({ status: false, message: "Password must be in 8-15 characters long and it should contains 1 Upper 1 lower 1 digit and 1 special character atleast" })
 
         if("address" in body){
-            if(isValidBody(address)) return res.status(400).send({status:false,message:"Address Should Not Be Empty"})
-            // if(!(typeof address==Object)) return res.status(400).send({status:false,message:"Pls add address in object format"})
             const { pincode,street,city } = address
-            if(!("street" in address))return res.status(400).send({status:false,message:"Street Attribute is Required While Entering Address"})
-            if(!("city" in address))return res.status(400).send({status:false,message:"city Attribute is Required While Entering Address"})
-            if(!("pincode"in address))return res.status(400).send({status:false,message:"pincode Attribute is Required While Entering Address"})
-            if(!isValid(street)) return res.status(400).send({status:false,message:"Dont Left Street Attribute Empty"})
-            if(!isValid(city)) return res.status(400).send({status:false,message:"Dont Left city Attribute Empty"})
-            if(!isValid(pincode)) return res.status(400).send({status:false,message:"Dont Left pincode Attribute Empty"})
-            
-            if(!isValidName(city)) return res.status(400).send({status:false,message:"Pls Enter Valid City Name"})
-            if (!isValidPincode(pincode)) return res.status(400).send({ status: false, message: "Pls Enter Valid PAN Pincode" })
+            if(typeof address === "string") return res.status(400).send({status:false,message:"Address Should be of object type"})
+            if(isValidBody(address)) return res.status(400).send({status:false,message:"Address Should Not Be Empty"})
+            if("street" in address){
+                if(!isValid(street)) return res.status(400).send({status:false,message:"Dont Left Street Attribute Empty"})}
+            if("city" in address){
+                if(!isValid(city)) return res.status(400).send({status:false,message:"Dont Left city Attribute Empty"})
+                if(!isValidName(city)) return res.status(400).send({status:false,message:"Pls Enter Valid City Name"})}
+            if("pincode"in address){
+                if(!isValid(pincode)) return res.status(400).send({status:false,message:"Dont Left pincode Attribute Empty"})
+                if (!isValidPincode(pincode)) return res.status(400).send({ status: false, message: "Pls Enter Valid PAN Pincode" })}}
 
-        }
         //——————————————————————————————Check unique PhoneNo.
         let checkUniquePhone = await userModel.findOne({ phone: phone })
         if (checkUniquePhone) return res.status(400).send({ status: false, message: "This No. Already Exists. Pls Use Unique Mobile No." })
@@ -87,7 +85,7 @@ const loginUser = async function (req, res) {
         let token = jwt.sign(
             { userId: user._id.toString(), iat: Math.floor(new Date().getTime() / 1000) },
 
-            "project-3@sss#group61", { expiresIn:"600s" }
+            "project-3@sss#group61", { expiresIn:"6000s" }
         );
         let decode= jwt.verify(token,"project-3@sss#group61")
         let date=decode.iat
@@ -95,11 +93,8 @@ const loginUser = async function (req, res) {
         res.status(200).send({ status: true, message: "Successfully loggedin",iat:time, token: token });
 
     } catch (err) {
-
-        console.log("This is the error:", err)
         res.status(500).send({ message: "Error", error: err.message })
     }
-
 }
 
 

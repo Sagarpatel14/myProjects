@@ -24,8 +24,8 @@ const isValidName = (name) => {
         return true
 }
 const isValidTName = (name) => {
-    let tname=name.trim()
-    if (/^[A-Za-z ]+[A-Za-z0-9\u00C0-\u017F-' ]*$/.test(tname))
+    let tName = name.trim()
+    if (/^[A-Za-z ]+[A-Za-z0-9\u00C0-\u017F-' ]*$/.test(tName))
         return true
 }
 const isValidExcerpt = (ex) => {
@@ -45,7 +45,7 @@ const isValidPassword = (pw) => {
         return true
 }
 const isValidIsbn = (no) => {
-    if (/^(ISBN[-]*(1[03])*[ ]*(: ){0,1})*(([0-9Xx][- ]*){13}|([0-9Xx][- ]*)){10}/.test(no))
+    if (/^(?:ISBN(?:-13)?:? )?(?=[0-9]{13}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)97[89][- ]?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9]$/.test(no))
         return true
 }
 const isValidTitle = (title) => {

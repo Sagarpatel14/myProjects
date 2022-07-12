@@ -36,6 +36,7 @@ const autho = async function (req, res, next) {
         if (!decodeToken) return res.status(400).send({ status: false, message: "Token invalid" })
         let decodedId = decodeToken.userId
         if (!(req.params.bookId)) {
+            if(Object.keys(req.body).length==0) return res.status(400).send({status:false,message:"Body should not be empty"})
             if (!("userId" in req.body)) return res.status(400).send({ status: false, message: "Pls Enter userId Of User at Which you want to create book" })
             if (req.body.userId.trim().length == 0) return res.status(400).send({ status: false, message: "Dont Left UserId Empty" })
             if (!(mongoose.isValidObjectId(req.body.userId))) return res.status(400).send({ status: false, message: "Pls enter UserId in Valid Format" })
@@ -52,7 +53,7 @@ const autho = async function (req, res, next) {
             if (!book) return res.status(404).send({ status: false, message: 'sorry, No such book exists' })
             let decodedId = decodeToken.userId
             if (book.userId != decodedId)
-                return res.status(403).send({ status: false, message: "You Are Not Authorise to update this book" })
+                return res.status(403).send({ status: false, message: "You Are Not Authorise to perform this Operation" })
         }
         next()
     }
