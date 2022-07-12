@@ -49,7 +49,7 @@ const createUser = async function (req, res) {
 
         //——————————————————————————————Check unique PhoneNo.
         let checkUniquePhone = await userModel.findOne({ phone: phone })
-        if (checkUniquePhone) return res.status(400).send({ status: false, message: "This No. Already Exists. Pls Use Unique Mobile No." })
+        if (checkUniquePhone) return res.status(400).send({ status: false, message: "This mobile No. Already Exists, Pls Use Unique Mobile No." })
 
         //——————————————————————————————Check unique Email.
         let checkUniqueMail = await userModel.findOne({ email: email })
