@@ -40,6 +40,10 @@ const createBooks = async function (req, res) {
         if (!validator.isISBN(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN" })
         if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
 
+        if(typeof subcategory !== "string"){
+            str= [...new Set(subcategory)]
+            data.subcategory=str
+        }
         //——————————————————————————————Check Unique Title———————————
         let usedTitle = await booksModel.findOne({ title: title })
         if (usedTitle) return res.status(400).send({ status: false, message: 'Title already exist' })
