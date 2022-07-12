@@ -1,7 +1,7 @@
 const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
-const { isValid, isValidObjectId, isValidBody, isValidName, isValidrating, isValidratingLength } = require('../validation/validation')
+const { isValid,isValidTName, isValidObjectId, isValidBody, isValidName, isValidrating, isValidratingLength } = require('../validation/validation')
 
 
 //—————————————————————————————— POST review By BookId in params———————————————————————————————————————
@@ -98,6 +98,7 @@ let updateReview = async function (req, res) {
         //—————————————————————————————— Validations———————————————————————————————————————
         if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Don't left ReviewedBy Empty" })
         if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
+        if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5" })
         if (!isValid(review)) return res.status(400).send({ status: false, message: "Don't left review Empty" })
 
             if (reviewedBy) {
@@ -107,13 +108,11 @@ let updateReview = async function (req, res) {
             }
 
             if (rating) {
-                if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
-                if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5" })
                 reviewData.rating = rating
             }
 
             if (review) {
-                if (!isValidName(review)) return res.status(400).send({ status: false, message: "Pls Enter Valid review in only alphabatical characters" })
+                if (!isValidTName(review)) return res.status(400).send({ status: false, message: "Pls Enter Valid review in only alphabatical characters" })
                 let trimmedReview = review.trim()
                 reviewData.review = trimmedReview
             }

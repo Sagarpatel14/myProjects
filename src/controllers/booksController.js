@@ -27,7 +27,7 @@ const createBooks = async function (req, res) {
         if (!isValidTName(title)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
 
         if (!isValid(excerpt)) return res.status(400).send({ status: false, message: 'Dont left Excerpt Empty' })
-        if (!isValidExcerpt(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
+        if (!isValidTName(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
 
         //——————————————————————————————Validations———————————
         if (!isValid(userId)) return res.status(400).send({ status: false, message: 'Dont left UserId Empty' })
@@ -36,7 +36,7 @@ const createBooks = async function (req, res) {
         if (!isValid(category)) return res.status(400).send({ status: false, message: 'please enter category Dont left Empty' })
         if (!isValid(subcategory)) return res.status(400).send({ status: false, message: 'please enter subcategory Dont left Empty' })
         if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date Dont left Empty' })
-        if (!isValidIsbn(ISBN)) return res.status(400).send({ status: false, message: 'please enter valid ISBN' })
+        if (!isValidIsbn(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN in 'XXX-X-XXX-XXXXX-X' format" })
         if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
 
         //——————————————————————————————Check Unique Title———————————
@@ -162,7 +162,7 @@ const updateBook = async function (req, res) {
                 book.title = trimtitle;
             }    
             if (excerpt) {
-                if (!isValidExcerpt(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
+                if (!isValidTName(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
                 let trimexcerpt=excerpt.trim()
                 book.excerpt = trimexcerpt;
             }    

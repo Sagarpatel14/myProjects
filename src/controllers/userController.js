@@ -1,3 +1,4 @@
+const { json } = require("body-parser");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 
@@ -36,7 +37,11 @@ const createUser = async function (req, res) {
 
         if("address" in body){
             const { pincode,street,city } = address
+            
             if(isValidBody(address)) return res.status(400).send({status:false,message:"Address Should Not Be Empty"})
+            //if(!("address" in {}))  {return res.status(400).send({status:false,message:"Pls add address in object format"})}
+            //else 
+
             if(!("street" in address))return res.status(400).send({status:false,message:"Street Attribute is Required While Entering Address"})
             if(!("city" in address))return res.status(400).send({status:false,message:"city Attribute is Required While Entering Address"})
             if(!("pincode"in address))return res.status(400).send({status:false,message:"pincode Attribute is Required While Entering Address"})
@@ -86,7 +91,7 @@ const loginUser = async function (req, res) {
         let token = jwt.sign(
             { userId: user._id.toString(), password: user.password, iat: Math.floor(new Date().getTime() / 1000) },
 
-            "project-3@sss#group61", { expiresIn:"600s" }
+            "project-3@sss#group61", { expiresIn:"6000s" }
         );
         let decode= jwt.verify(token,"project-3@sss#group61")
         let date=decode.iat
