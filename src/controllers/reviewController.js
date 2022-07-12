@@ -66,16 +66,16 @@ let updateReview = async function (req, res) {
         if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, message: 'pls give a valid book id in params' })
         let bookData = await booksModel.findById(bookId)
         ////——————————————————————————————checking whether the boook is deleted or not 
-        if(bookData.isDeleted==true) return res.status(400).send({status: false,message:'this book is already deleted'})
         if(!bookData) return res.status(404).send({status: false,message:'this bookId does not exist'})
+        if(bookData.isDeleted==true) return res.status(400).send({status: false,message:'this book is already deleted'})
         
         let reviewId = req.params.reviewId;
-        ////——————————————————————————————Check unique PhoneNo.check review id is present in params or not 
+        ////——————————————————————————————check review id is present in params or not 
         if (!reviewId) return res.status(400).send({ status: false, message: 'pls give a review id in params' })
         if (!isValidObjectId(reviewId)) return res.status(400).send({ status: false, message: 'pls give a valid review id in params' })
-        ////——————————————————————————————Check unique PhoneNo.check whether the user gave userId instead of reviewId
+        ////——————————————————————————————check whether the user gave userId instead of reviewId
         if(await userModel.findOne({_id :reviewId })) return res.status(400).send({status:false, message:'Pls give reviewId instead of userId'})
-        ////——————————————————————————————Check unique PhoneNo.check whether the user gave bookId instead of reviewId
+        ////——————————————————————————————check whether the user gave bookId instead of reviewId
         if(await booksModel.findOne({_id :reviewId })) return res.status(400).send({status:false, message:'Pls give reviewId instead of bookId'})
         let reviewData = await reviewModel.findById(reviewId)
         if (!reviewData) return res.status(404).send({ status: false, message: 'sorry, No such review exists' })
@@ -143,8 +143,8 @@ const deleteReview = async function (req, res) {
         if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, messsage: "Pls Enter bookId in Valid Format" })
         // ——————————————————————————————Check whether book is deleted or not
         let checkBookDeleted = await booksModel.findById(bookId)
-        if(checkBookDeleted.isDeleted == true) return res.status(400).send({status: false, message: "Sorry, this book is deleted"})
         if (!(await booksModel.findById(bookId))) return res.status(404).send({ status: false, message: "This BookId Doesn't Exist" })
+        if(checkBookDeleted.isDeleted == true) return res.status(400).send({status: false, message: "Sorry, this book is deleted"})
 
         if (!isValidObjectId(reviewId)) return res.status(400).send({ status: false, messsage: "Pls Enter reviewId in Valid Format" })
         // ——————————————————————————————Checking if User Give UserId instead of ReviewId
@@ -155,15 +155,15 @@ const deleteReview = async function (req, res) {
         if (!(await reviewModel.findById(reviewId))) return res.status(404).send({ status: false, message: "This reviewId Doesn't Exist" })
 
         let findReview = await reviewModel.findOne({ $and: [{ bookId: bookId, _id: reviewId }] });
-        if (findReview.isDeleted == true) return res.status(400).send({ status: false, message: "This review is already deleted" });
         if (!findReview) return res.status(404).send({ status: false, message: "Review not found" });
-        let deleteReview = await reviewModel.findOneAndUpdate({_id:reviewId},{ isDeleted: true }, { new: true })
+        if (findReview.isDeleted == true) return res.status(400).send({ status: false, message: "This review is already deleted" });
+         await reviewModel.findOneAndUpdate({_id:reviewId},{ isDeleted: true }, { new: true })
         await booksModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: -1 } })
 
         res.status(200).send({ status: true, message: "Your Review Is Successfully Deleted" });
 
     } catch (err) {
-        console.log("This is the error:", err.message)
+        console.log("This is the error:", err)
         res.status(500).send({ message: "Error", error: err.message })
     }
 
