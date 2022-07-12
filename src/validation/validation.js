@@ -24,7 +24,8 @@ const isValidName = (name) => {
         return true
 }
 const isValidTName = (name) => {
-    if (/^[A-Za-z ]+[A-Za-z0-9\u00C0-\u017F-' ]*$/.test(name))
+    let tname=name.trim()
+    if (/^[A-Za-z ]+[A-Za-z0-9\u00C0-\u017F-' ]*$/.test(tname))
         return true
 }
 const isValidExcerpt = (ex) => {

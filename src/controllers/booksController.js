@@ -2,7 +2,7 @@ const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
 const { isValidTName,isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody, isValidName, isValidExcerpt } = require('../validation/validation')
-const { set } = require('mongoose')
+
 
 //——————————————————————————————Create Books———————————————————————————————————————————————————————————————————————————————————
 
@@ -27,7 +27,7 @@ const createBooks = async function (req, res) {
         if (!isValidTName(title)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
 
         if (!isValid(excerpt)) return res.status(400).send({ status: false, message: 'Dont left Excerpt Empty' })
-        if (!isValidExcerpt(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
+        if (!isValidTName(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
 
         //——————————————————————————————Validations———————————
         if (!isValid(userId)) return res.status(400).send({ status: false, message: 'Dont left UserId Empty' })
