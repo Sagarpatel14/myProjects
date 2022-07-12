@@ -36,9 +36,13 @@ const createBooks = async function (req, res) {
         if (!isValid(category)) return res.status(400).send({ status: false, message: 'please enter category Dont left Empty' })
         if (!isValid(subcategory)) return res.status(400).send({ status: false, message: 'please enter subcategory Dont left Empty' })
         if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date Dont left Empty' })
-        if (!isValidIsbn(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN in 'XXX-X-XXX-XXXXX-X' format" })
+        // if (!isValidIsbn(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN in 'XXX-X-XXX-XXXXX-X' format" })
         if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
 
+        if(typeof subcategory !== "string"){
+            str= [...new Set(subcategory)]
+            data.subcategory=str
+        }
         //——————————————————————————————Check Unique Title———————————
         let usedTitle = await booksModel.findOne({ title: title })
         if (usedTitle) return res.status(400).send({ status: false, message: 'Title already exist' })
@@ -49,8 +53,10 @@ const createBooks = async function (req, res) {
         let checkUserId = await userModel.findById(userId)
         if (!checkUserId) return res.status(404).send({ status: false, message: 'this user id does not exist' })
 
-        str= [...new Set(subcategory)]
-        data.subcategory=str
+        
+
+        let trimcatlower= category.trim().toLowerCase()
+        data.category=trimcatlower
         let saveData = await booksModel.create(data)
         res.status(201).send({ status: true, message: 'success', data: saveData })
     }
