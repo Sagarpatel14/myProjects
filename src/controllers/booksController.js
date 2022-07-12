@@ -1,7 +1,7 @@
 const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
-const { isValidTName,isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody, isValidName, isValidExcerpt } = require('../validation/validation')
+const { isValidTName,isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody, isValidName } = require('../validation/validation')
 
 
 //——————————————————————————————Create Books———————————————————————————————————————————————————————————————————————————————————
@@ -96,7 +96,7 @@ const getBooks = async function (req, res) {
         }
         
         let data = await booksModel.find(filter).select({title:1,excerpt:1,userId:1,category:1,reviews:1,releasedAt:1}).sort({ title: 1 })
-        if (data.length == 0) { return res.status(400).send({ status: false, message: "Sorry No Books Found or its deleted" }) }
+        if (data.length == 0) { return res.status(404).send({ status: false, message: "Sorry No Books Found or its deleted" }) }
         else { return res.status(200).send({ status: true, message: "Books list", data: data }) }
     }
     catch (err) {
@@ -178,7 +178,7 @@ const updateBook = async function (req, res) {
             book.save()
             return res.status(200).send({ status: true, data: book })
         } else {
-            return res.status(404).send({ satus: false, message: 'No such book found or deleted' })
+            return res.status(404).send({ satus: false, message: 'No such book found or it is deleted' })
         }    
     }    
     catch (err) {
@@ -198,10 +198,10 @@ const deleteBooks = async function (req, res) {
         if (!isValidObjectId(bookId)) return res.status(400).send({ status: false, messsage: "Pls Enter bookId in Valid Format"})
 
         let book = await booksModel.findById(bookId);
-        if (book.isDeleted == true) return res.status(400).send({ status: false, message: "This book is already deleted" });
         if (!book) return res.status(404).send({ status: false, message: "Book not found" })
+        if (book.isDeleted == true) return res.status(400).send({ status: false, message: "This book is already deleted" });
         
-        let deletedBook = await booksModel.findOneAndUpdate({ _id: bookId }, {
+        await booksModel.findOneAndUpdate({ _id: bookId }, {
             $set: { isDeleted: true, deletedAt: Date() }
         }, { new: true });
 
