@@ -18,7 +18,7 @@ const authe = async function (req, res, next) {
                 }
             }
             // req.userId = decoded.userId;
-            console.log(decoded.userId)
+            // console.log(decoded.userId)
             next();
         });
     }

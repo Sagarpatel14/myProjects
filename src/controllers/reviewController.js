@@ -89,28 +89,23 @@ let updateReview = async function (req, res) {
         
         if (isValidBody(body)) return res.status(400).send({ status: false, message: 'Dont Left Body Empty' })
         
-        //—————————————————————————————— Mandatory Fields checking———————————————————————————————————————
-        if (!("reviewedBy" in body)) return res.status(400).send({ status: false, message: "Pls Enter reviewrs name, Its Required" })
-        if (!("rating" in body)) return res.status(400).send({ status: false, message: "Pls Enter rating, Its Required" })
-        if (!("review" in body)) return res.status(400).send({ status: false, message: "Pls Enter review, Its Required" })
-        
         //—————————————————————————————— Validations———————————————————————————————————————
-        if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Don't left ReviewedBy Empty" })
-        if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
-        if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5" })
-        if (!isValid(review)) return res.status(400).send({ status: false, message: "Don't left review Empty" })
-
-            if (reviewedBy) {
+        
+            if (body.hasOwnProperty("reviewedBy")) {
+                if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Don't left ReviewedBy Empty" })
                 if (!isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Pls Enter Valid reviewers name" })
                 let trimmedName =reviewedBy.trim()
                 reviewData.reviewedBy = trimmedName
             }
 
-            if (rating) {
+            if (body.hasOwnProperty("rating")) {
+            if (!isValidrating(rating)) return res.status(400).send({ status: false, message: "Dont Add String to Rating(Number) attribute" })
+            if (!isValidratingLength(rating)) return res.status(400).send({ status: false, message: "The Rating Value must Between 1 to 5" })
                 reviewData.rating = rating
             }
 
-            if (review) {
+            if (body.hasOwnProperty("review")) {
+                if (!isValid(review)) return res.status(400).send({ status: false, message: "Don't left review Empty" })
                 if (!isValidTName(review)) return res.status(400).send({ status: false, message: "Pls Enter Valid review in only alphabatical characters" })
                 let trimmedReview = review.trim()
                 reviewData.review = trimmedReview

@@ -40,10 +40,6 @@ const createBooks = async function (req, res) {
         if (!validator.isISBN(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN" })
         if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
 
-        if(typeof subcategory !== "string"){
-            str= [...new Set(subcategory)]
-            data.subcategory=str
-        }
         //——————————————————————————————Check Unique Title———————————
         let usedTitle = await booksModel.findOne({ title: title })
         if (usedTitle) return res.status(400).send({ status: false, message: 'Title already exist' })
@@ -158,33 +154,30 @@ const updateBook = async function (req, res) {
         let { title, excerpt, releasedAt, ISBN } = body;
 
         if (isValidBody(body)) return res.status(400).send({ status: false, message: 'please enter body' })
-        //——————————————————————————————Check Mandatory Fields———————————
-        if (!("title" in body)) return res.status(400).send({ status: false, message: "Pls Enter Title, Its Required" })
-        if (!("excerpt" in body)) return res.status(400).send({ status: false, message: "Pls Enter excerpt, Its Required" })
-        if (!("releasedAt" in body)) return res.status(400).send({ status: false, message: "Pls Enter releasedAt, Its Required" })
-        if (!("ISBN" in body)) return res.status(400).send({ status: false, message: "Pls Enter ISBN, Its Required" })
+    
         //——————————————————————————————Validations———————————
-        if (!isValid(title)) return res.status(400).send({ status: false, message: "Don't left title Empty" })
-        if (!isValid(excerpt)) return res.status(400).send({ status: false, message: "Don't left Excerpt Empty" })
-        if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date, Dont leave it Empty' })
-        if (!isValid(ISBN)) return res.status(400).send({ status: false, message: 'Dont left ISBN empty' })
+       
         if (book && book.isDeleted == false) {
-            if (title) {
+            if (body.hasOwnProperty("title")) {
+                if (!isValid(title)) return res.status(400).send({ status: false, message: "Don't left title Empty" })
                 if (!isValidName(title)) return res.status(400).send({ status: false, message: "Pls Enter Valid title" })
                 if (await booksModel.findOne({ title: title })) return res.status(400).send({ status: false, message: 'the title has already been used' })
                 let trimtitle = title.trim()
                 book.title = trimtitle;
             }
-            if (excerpt) {
+            if (body.hasOwnProperty("excerpt")) {
+                if (!isValid(excerpt)) return res.status(400).send({ status: false, message: "Don't left Excerpt Empty" })
                 if (!isValidTName(excerpt)) return res.status(400).send({ status: false, message: 'Pls Enter Valid excerpt' })
                 let trimexcerpt = excerpt.trim()
                 book.excerpt = trimexcerpt;
             }
-            if (releasedAt) {
+            if (body.hasOwnProperty("releasedAt")) {
+                if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date, Dont leave it Empty' })
                 if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
                 book.releasedAt = releasedAt
             }
-            if (ISBN) {
+            if (body.hasOwnProperty("ISBN")) {
+                if (!isValid(ISBN)) return res.status(400).send({ status: false, message: 'Dont left ISBN empty' })
                 if (!isValidIsbn(ISBN)) return res.status(400).send({ status: false, message: 'please enter valid ISBN' })
                 if (await booksModel.findOne({ ISBN: ISBN })) return res.status(400).send({ status: false, message: 'the ISBN has already been used' })
                 book.ISBN = ISBN
