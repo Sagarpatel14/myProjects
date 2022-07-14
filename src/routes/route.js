@@ -26,4 +26,7 @@ router.delete("/books/:bookId", mw.authe, mw.autho, booksController.deleteBooks)
 //—————————————————————— Delete Review by BookId and ReviewId ————————————————————————————————
 router.delete("/books/:bookId/review/:reviewId", reviewController.deleteReview)
 
+
+router.post("/write-book-cover/:bookId",)
+
 module.exports = router
