@@ -47,12 +47,13 @@ const createUrl = async function (req, res) {
       });
     }
 
-    let urlCode = shortid.generate().toLowerCase();
-    let shortUrl = "localhost:3000/" + urlCode;
+    const urlCode = shortid.generate().toLowerCase();
+    const baseUrl = "localhost:3000" ;
+    const shortUrl = baseUrl + "/" + urlCode;
 
-    let data = { longUrl, shortUrl, urlCode };
+    const data = { longUrl, shortUrl, urlCode };
 
-    let createData = await urlModel.create(data);
+    const createData = await urlModel.create(data);
 
     const result = {
       longUrl: createData.longUrl,
