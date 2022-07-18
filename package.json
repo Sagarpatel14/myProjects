@@ -1,7 +1,7 @@
 {
   "name": "project-4-url-shortener",
   "version": "1.0.0",
-  "description": "RADON-Batch Project-4 Scalable-URL-Shortener Group-X",
+  "description": "RADON-Batch Project-4 Scalable-URL-Shortener Group-1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,9 +16,9 @@
     "Radon-Batch",
     "Project-4",
     "Scalable-URL-Shortener",
-    "Group-X"
+    "Group-1"
   ],
-  "author": "Vikas Mehra",
+  "author": "Vikas Mehra, Sagar Patel, Sagar Samediya, Hempal Singh",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Vikas-Mehra/Project-4-URL-Shortener/issues"
@@ -27,6 +27,8 @@
   "dependencies": {
     "express": "^4.18.1",
     "mongoose": "^6.4.4",
-    "nodemon": "^2.0.19"
+    "nodemon": "^2.0.19",
+    "shortid": "^2.2.16",
+    "valid-url": "^1.0.9"
   }
 }

@@ -1,4 +1,6 @@
 const urlModel = require("../models/urlModel");
+const validUrl = require("valid-url");
+const shortid = require("shortid");
 
 //----------------------------------------------------------------------------------------
 //                                1. API -  POST/url/shorten
@@ -7,6 +9,12 @@ const urlModel = require("../models/urlModel");
 const createUrl = async function (req, res) {
   try {
     console.log("Create URL.");
+
+    let { longUrl } = req.body ; 
+
+    let shortUrl ;
+    let urlCode ;
+
 
     return res.status(201).send({
       status: true,
