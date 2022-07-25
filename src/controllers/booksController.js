@@ -2,6 +2,9 @@ const booksModel = require('../models/booksModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
 const validator = require("validator")
+const aws= require("aws-sdk")
+
+
 const { isValidTName, isValid, isValidIsbn, isValidDate, isValidObjectId, isValidBody, isValidName } = require('../validation/validation')
 
 
@@ -37,9 +40,9 @@ const createBooks = async function (req, res) {
         if (!isValid(category)) return res.status(400).send({ status: false, message: 'please enter category Dont left Empty' })
         if (!isValid(subcategory)) return res.status(400).send({ status: false, message: 'please enter subcategory Dont left Empty' })
         if (!isValid(releasedAt)) return res.status(400).send({ status: false, message: 'please enter release date Dont left Empty' })
-       // if (!validator.isISBN(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN" })
+        if (!isValidIsbn(ISBN)) return res.status(400).send({ status: false, message: "please enter valid ISBN in this format x-xxx-xxxxx-x or xxx-x-xxx-xxxxx-x" })
         if (!isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please enter the date in 'YYYY-MM-DD' format" })
-
+        
         //——————————————————————————————Check Unique Title———————————
         let usedTitle = await booksModel.findOne({ title: title })
         if (usedTitle) return res.status(400).send({ status: false, message: 'Title already exist' })
@@ -59,8 +62,50 @@ const createBooks = async function (req, res) {
         }
         else { let lowered = subcategory.toLowerCase()
             data.subcategory = lowered}
-        let saveData = await booksModel.create(data)
-        res.status(201).send({ status: true, message: 'success', data: saveData })
+
+            
+            aws.config.update({
+                accessKeyId: "AKIAY3L35MCRVFM24Q7U",
+                secretAccessKey: "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",
+                region: "ap-south-1"
+            })
+            
+            let uploadFile= async ( file) =>{
+               return new Promise( function(resolve, reject) {
+                // this function will upload file to aws and return the link
+                let s3= new aws.S3({apiVersion: '2006-03-01'}); // we will be using the s3 service of aws
+            
+                var uploadParams= {
+                    ACL: "public-read",
+                    Bucket: "classroom-training-bucket",  //HERE
+                    Key: "abc/" + file.originalname, //HERE 
+                    Body: file.buffer
+                }
+                s3.upload( uploadParams, function (err, data ){
+                    if(err) {
+                        return reject({"error": err})
+                    }
+                    console.log(data)
+                    console.log("file uploaded succesfully")
+                    return resolve(data.Location)
+                })
+               })
+            }
+            let files= req.files
+            if(files && files.length>0){
+             // upload to s3 and get the uploaded link
+             // res.send the link back to frontend/postman
+            let uploadedFileURL= await uploadFile(files[0])
+            data.bookCover =uploadedFileURL
+            let saveData = await booksModel.create(data)
+            res.status(201).send({ status: true, message: 'successfully book created and image uploaded', data: saveData})
+            
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        }
+            
+        
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message })
@@ -220,6 +265,8 @@ const deleteBooks = async function (req, res) {
     }
 
 }
+
+// ----------------------------------------------------------------------
 
 
 

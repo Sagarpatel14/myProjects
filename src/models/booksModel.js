@@ -18,6 +18,7 @@ const bookSchema = new mongoose.Schema({
     reviews: { type: Number, default: 0, comment: Number },
 
     deletedAt: Date,
+    bookCover:String,
 
     releasedAt: { type: Date, required: true },
 
