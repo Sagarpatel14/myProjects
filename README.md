@@ -1,144 +1,371 @@
-# book-management
-# Radon
-
-## Project - Books Management
+#Radon
+## Project - Products Management
 
 ### Key points
+- In this project we will work feature wise. That means we pick one object like user, book, blog, etc at a time. We work through it's feature. The steps would be:
+  1) We create it's model.
+  2) We build it's APIs.
+  3) We test these APIs.
+  4) We deploy these APIs.
+  5) We integrate these APIs with frontend.
+  6) We will repeat steps from Step 1 to Step 5 for each feature in this project.
+- This project is divided into 4 features namely User, Product, Cart and Order. You need to work on a single feature at a time. Once that is completed as per above mentioned steps. You will be instructed to move to next Feature.
+- In this project we are changing how we send token with a request. Instead of using a custom header key like x-api-key, you need to use Authorization header and send the JWT token as Bearer token.
 - Create a group database `groupXDatabase`. You can clean the db you previously used and resue that.
-- This time each group should have a *single git branch*. Coordinate amongst yourselves by ensuring every next person pulls the code last pushed by a team mate. You branch will be checked as part of the demo. Branch name should follow the naming convention `project/booksManagementGroupX`
+- This time each group should have a *single git branch*. Coordinate amongst yourselves by ensuring every next person pulls the code last pushed by a team mate. You branch will be checked as part of the demo. Branch name should follow the naming convention `project/productsManagementGroupX`
 - Follow the naming conventions exactly as instructed.
 
+
+## FEATURE I - User
 ### Models
 - User Model
 ```yaml
 { 
-  title: {string, mandatory, enum[Mr, Mrs, Miss]},
-  name: {string, mandatory},
-  phone: {string, mandatory, unique},
-  email: {string, mandatory, valid email, unique}, 
-  password: {string, mandatory, minLen 8, maxLen 15},
+  fname: {string, mandatory},
+  lname: {string, mandatory},
+  email: {string, mandatory, valid email, unique},
+  profileImage: {string, mandatory}, // s3 link
+  phone: {string, mandatory, unique, valid Indian mobile number}, 
+  password: {string, mandatory, minLen 8, maxLen 15}, // encrypted password
   address: {
-    street: {string},
-    city: {string},
-    pincode: {string}
+    shipping: {
+      street: {string, mandatory},
+      city: {string, mandatory},
+      pincode: {number, mandatory}
+    },
+    billing: {
+      street: {string, mandatory},
+      city: {string, mandatory},
+      pincode: {number, mandatory}
+    }
   },
   createdAt: {timestamp},
   updatedAt: {timestamp}
 }
 ```
 
-- Books Model
+
+## User APIs 
+### POST /register
+- Create a user document from request body. Request body must contain image.
+- Upload image to S3 bucket and save it's public url in user document.
+- Save password in encrypted format. (use bcrypt)
+- __Response format__
+  - _**On success**_ - Return HTTP status 201. Also return the user document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
+{
+    "status": true,
+    "message": "User created successfully",
+    "data": {
+        "fname": "John",
+        "lname": "Doe",
+        "email": "johndoe@mailinator.com",
+        "profileImage": "https://classroom-training-bucket.s3.ap-south-1.amazonaws.com/user/copernico-p_kICQCOM4s-unsplash.jpg",
+        "phone": 9876543210,
+        "password": "$2b$10$DpOSGb0B7cT0f6L95RnpWO2P/AtEoE6OF9diIiAEP7QrTMaV29Kmm",
+        "address": {
+            "shipping": {
+                "street": "MG Road",
+                "city": "Indore",
+                "pincode": 452001
+            },
+            "billing": {
+                "street": "MG Road",
+                "city": "Indore",
+                "pincode": 452001
+            }
+        },
+        "_id": "6162876abdcb70afeeaf9cf5",
+        "createdAt": "2021-10-10T06:25:46.051Z",
+        "updatedAt": "2021-10-10T06:25:46.051Z",
+        "__v": 0
+    }
+}
+```
+
+### POST /login
+- Allow an user to login with their email and password.
+- On a successful login attempt return the userId and a JWT token contatining the userId, exp, iat.
+> **_NOTE:_** There is a slight change in response body. You should also return userId in addition to the JWT token.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200 and JWT token in response body. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
+{
+    "status": true,
+    "message": "User login successfull",
+    "data": {
+        "userId": "6165f29cfe83625cf2c10a5c",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTYyODc2YWJkY2I3MGFmZWVhZjljZjUiLCJpYXQiOjE2MzM4NDczNzYsImV4cCI6MTYzMzg4MzM3Nn0.PgcBPLLg4J01Hyin-zR6BCk7JHBY-RpuWMG_oIK7aV8"
+    }
+}
+```
+
+## GET /user/:userId/profile (Authentication required)
+- Allow an user to fetch details of their profile.
+- Make sure that userId in url param and in token is same
+- __Response format__
+  - _**On success**_ - Return HTTP status 200 and returns the user document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
+{
+    "status": true,
+    "message": "User profile details",
+    "data": {
+        "address": {
+            "shipping": {
+                "street": "MG Road",
+                "city": "Indore",
+                "pincode": 452001
+            },
+            "billing": {
+                "street": "MG Road",
+                "city": "Indore",
+                "pincode": 452001
+            }
+        },
+        "_id": "6162876abdcb70afeeaf9cf5",
+        "fname": "John",
+        "lname": "Doe",
+        "email": "johndoe@mailinator.com",
+        "profileImage": "https://classroom-training-bucket.s3.ap-south-1.amazonaws.com/user/copernico-p_kICQCOM4s-unsplash.jpg",
+        "phone": 9876543210,
+        "password": "$2b$10$DpOSGb0B7cT0f6L95RnpWO2P/AtEoE6OF9diIiAEP7QrTMaV29Kmm",
+        "createdAt": "2021-10-10T06:25:46.051Z",
+        "updatedAt": "2021-10-10T06:25:46.051Z",
+        "__v": 0
+    }
+}
+```
+
+## PUT /user/:userId/profile (Authentication and Authorization required)
+- Allow an user to update their profile.
+- A user can update all the fields
+- Make sure that userId in url param and in token is same
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated user document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
+{
+    "status": true,
+    "message": "User profile updated",
+    "data": {
+        "address": {
+            "shipping": {
+                "street": "MG Road",
+                "city": "Delhi",
+                "pincode": 110001
+            },
+            "billing": {
+                "street": "MG Road",
+                "city": "Indore",
+                "pincode": 452010
+            }
+        },
+        "_id": "6162876abdcb70afeeaf9cf5",
+        "fname": "Jane",
+        "lname": "Austin",
+        "email": "janedoe@mailinator.com",
+        "profileImage": "https://classroom-training-bucket.s3.ap-south-1.amazonaws.com/user/laura-davidson-QBAH4IldaZY-unsplash.jpg",
+        "phone": 9876543210,
+        "password": "$2b$10$jgF/j/clYBq.3uly6Tijce4GEGJn9EIXEcw9NI3prgKwJ/6.sWT6O",
+        "createdAt": "2021-10-10T06:25:46.051Z",
+        "updatedAt": "2021-10-10T08:47:15.297Z",
+        "__v": 0
+    }
+}
+```
+
+Note: [Bcrypt](https://www.npmjs.com/package/bcrypt)
+Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+
+## FEATTURE II - Product
+### Models
+- Product Model
 ```yaml
 { 
   title: {string, mandatory, unique},
-  excerpt: {string, mandatory}, 
-  userId: {ObjectId, mandatory, refs to user model},
-  ISBN: {string, mandatory, unique},
-  category: {string, mandatory},
-  subcategory: [string, mandatory],
-  reviews: {number, default: 0, comment: Holds number of reviews of this book},
+  description: {string, mandatory},
+  price: {number, mandatory, valid number/decimal},
+  currencyId: {string, mandatory, INR},
+  currencyFormat: {string, mandatory, Rupee symbol},
+  isFreeShipping: {boolean, default: false},
+  productImage: {string, mandatory},  // s3 link
+  style: {string},
+  availableSizes: {array of string, at least one size, enum["S", "XS","M","X", "L","XXL", "XL"]},
+  installments: {number},
   deletedAt: {Date, when the document is deleted}, 
   isDeleted: {boolean, default: false},
-  releasedAt: {Date, mandatory, format("YYYY-MM-DD")},
   createdAt: {timestamp},
   updatedAt: {timestamp},
 }
 ```
 
-- Review Model (Books review)
+
+## Products API (_No authentication required_)
+### POST /products
+- Create a product document from request body.
+- Upload product image to S3 bucket and save image public url in document.
+- __Response format__
+  - _**On success**_ - Return HTTP status 201. Also return the product document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### GET /products
+- Returns all products in the collection that aren't deleted.
+  - __Filters__
+    - Size (The key for this filter will be 'size')
+    - Product name (The key for this filter will be 'name'). You should return all the products with name containing the substring recieved in this filter
+    - Price : greater than or less than a specific value. The keys are 'priceGreaterThan' and 'priceLessThan'. 
+    
+> **_NOTE:_** For price filter request could contain both or any one of the keys. For example the query in the request could look like { priceGreaterThan: 500, priceLessThan: 2000 } or just { priceLessThan: 1000 } )
+    
+  - __Sort__
+    - Sorted by product price in ascending or descending. The key value pair will look like {priceSort : 1} or {priceSort : -1}
+  _eg_ /products?size=XL&name=Nit%20grit
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the product documents. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### GET /products/:productId
+- Returns product details by product id
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the product documents. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### PUT /products/:productId
+- Updates a product by changing at least one or all fields
+- Check if the productId exists (must have isDeleted false and is present in collection). If it doesn't, return an HTTP status 404 with a response body like [this](#error-response-structure)
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated product document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### DELETE /products/:productId
+- Deletes a product by product id if it's not already deleted
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+
+
+## FEATURE III - Cart
+### Models
+- Cart Model
 ```yaml
 {
-  bookId: {ObjectId, mandatory, refs to book model},
-  reviewedBy: {string, mandatory, default 'Guest', value: reviewer's name},
-  reviewedAt: {Date, mandatory},
-  rating: {number, min 1, max 5, mandatory},
-  review: {string, optional}
-  isDeleted: {boolean, default: false},
+  userId: {ObjectId, refs to User, mandatory, unique},
+  items: [{
+    productId: {ObjectId, refs to Product model, mandatory},
+    quantity: {number, mandatory, min 1}
+  }],
+  totalPrice: {number, mandatory, comment: "Holds total price of all the items in the cart"},
+  totalItems: {number, mandatory, comment: "Holds total number of items in the cart"},
+  createdAt: {timestamp},
+  updatedAt: {timestamp},
 }
 ```
 
-## User APIs 
-### POST /register
-- Create a user - atleast 5 users
-- Create a user document from request body.
-- Return HTTP status 201 on a succesful user creation. Also return the user document. The response should be a JSON object like [this](#successful-response-structure)
-- Return HTTP status 400 if no params or invalid params received in request body. The response should be a JSON object like [this](#error-response-structure)
 
-### POST /login
-- Allow an user to login with their email and password.
-- On a successful login attempt return a JWT token contatining the userId, exp, iat. The response should be a JSON object like [this](#successful-response-structure)
-- If the credentials are incorrect return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+## Cart APIs (_authentication required as authorization header - bearer token_)
+### POST /users/:userId/cart (Add to cart)
+- Create a cart for the user if it does not exist. Else add product(s) in cart.
+- Get cart id in request body.
+- Get productId in request body.
+- Make sure that cart exist.
+- Add a product(s) for a user in the cart.
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Make sure the product(s) are valid and not deleted.
+- Get product(s) details in response body.
+- __Response format__
+  - _**On success**_ - Return HTTP status 201. Also return the cart document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
-## Books API
-### POST /books
-- Create a book document from request body. Get userId in request body only.
-- Make sure the userId is a valid userId by checking the user exist in the users collection.
-- Return HTTP status 201 on a succesful book creation. Also return the book document. The response should be a JSON object like [this](#successful-response-structure) 
-- Create atleast 10 books for each user
-- Return HTTP status 400 for an invalid request with a response body like [this](#error-response-structure)
+### PUT /users/:userId/cart (Remove product / Reduce a product's quantity from the cart)
+- Updates a cart by either decrementing the quantity of a product by 1 or deleting a product from the cart.
+- Get cart id in request body.
+- Get productId in request body.
+- Get key 'removeProduct' in request body. 
+- Make sure that cart exist.
+- Key 'removeProduct' denotes whether a product is to be removed({removeProduct: 0}) or its quantity has to be decremented by 1({removeProduct: 1}).
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get product(s) details in response body.
+- Check if the productId exists and is not deleted before updating the cart.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated cart document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
-### GET /books
-- Returns all books in the collection that aren't deleted. Return only book _id, title, excerpt, userId, category, releasedAt, reviews field. Response example [here](#get-books-response)
-- Return the HTTP status 200 if any documents are found. The response structure should be like [this](#successful-response-structure) 
-- If no documents are found then return an HTTP status 404 with a response like [this](#error-response-structure) 
-- Filter books list by applying filters. Query param can have any combination of below filters.
-  - By userId
-  - By category
-  - By subcategory
-  example of a query url: books?filtername=filtervalue&f2=fv2
-- Return all books sorted by book name in Alphabatical order
+### GET /users/:userId/cart
+- Returns cart summary of the user.
+- Make sure that cart exist.
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get product(s) details in response body.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Return the cart document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
-### GET /books/:bookId
-- Returns a book with complete details including reviews. Reviews array would be in the form of Array. Response example [here](#book-details-response)
-- Return the HTTP status 200 if any documents are found. The response structure should be like [this](#successful-response-structure) 
-- If the book has no reviews then the response body should include book detail as shown [here](#book-details-response-no-reviews) and an empty array for reviewsData.
-- If no documents are found then return an HTTP status 404 with a response like [this](#error-response-structure) 
+### DELETE /users/:userId/cart
+- Deletes the cart for the user.
+- Make sure that cart exist.
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- cart deleting means array of items is empty, totalItems is 0, totalPrice is 0.
+- __Response format__
+  - _**On success**_ - Return HTTP status 204. Return a suitable message. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
-### PUT /books/:bookId
-- Update a book by changing its
-  - title
-  - excerpt
-  - release date
-  - ISBN
-- Make sure the unique constraints are not violated when making the update
-- Check if the bookId exists (must have isDeleted false and is present in collection). If it doesn't, return an HTTP status 404 with a response body like [this](#error-response-structure)
-- Return an HTTP status 200 if updated successfully with a body like [this](#successful-response-structure) 
-- Also make sure in the response you return the updated book document. 
 
-### DELETE /books/:bookId
-- Check if the bookId exists and is not deleted. If it does, mark it deleted and return an HTTP status 200 with a response body with status and message.
-- If the book document doesn't exist then return an HTTP status of 404 with a body like [this](#error-response-structure) 
 
-## Review APIs
-### POST /books/:bookId/review
-- Add a review for the book in reviews collection.
-- Check if the bookId exists and is not deleted before adding the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
-- Get review details like review, rating, reviewer's name in request body.
-- Update the related book document by increasing its review count
-- Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#successful-response-structure)
+## FEATURE IV - Order
+### Models
+- Order Model
+```yaml
+{
+  userId: {ObjectId, refs to User, mandatory},
+  items: [{
+    productId: {ObjectId, refs to Product model, mandatory},
+    quantity: {number, mandatory, min 1}
+  }],
+  totalPrice: {number, mandatory, comment: "Holds total price of all the items in the cart"},
+  totalItems: {number, mandatory, comment: "Holds total number of items in the cart"},
+  totalQuantity: {number, mandatory, comment: "Holds total number of quantity in the cart"},
+  cancellable: {boolean, default: true},
+  status: {string, default: 'pending', enum[pending, completed, cancled]},
+  deletedAt: {Date, when the document is deleted}, 
+  isDeleted: {boolean, default: false},
+  createdAt: {timestamp},
+  updatedAt: {timestamp},
+}
+```
 
-### PUT /books/:bookId/review/:reviewId
-- Update the review - review, rating, reviewer's name.
-- Check if the bookId exists and is not deleted before updating the review. Check if the review exist before updating the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
-- Get review details like review, rating, reviewer's name in request body.
-- Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#book-details-response)
 
-### DELETE /books/:bookId/review/:reviewId
-- Check if the review exist with the reviewId. Check if the book exist with the bookId. Send an error response with appropirate status code like [this](#error-response-structure) if the book or book review does not exist
-- Delete the related reivew.
-- Update the books document - decrease review count by one
+## Checkout/Order APIs (Authentication and authorization required)
+### POST /users/:userId/orders
+- Create an order for the user
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get cart details in the request body
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the order document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
-### Authentication
-- Make sure all the book routes are protected.
-
-### Authorisation
-- Make sure that only the owner of the books is able to create, edit or delete the book.
-- In case of unauthorized access return an appropirate error message.
+## PUT /users/:userId/orders
+- Updates an order status
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get order id in request body
+- Make sure the order belongs to the user
+- Make sure that only a cancellable order could be canceled. Else send an appropriate error message and response.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated order document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
 ## Testing 
-- To test these apis create a new collection in Postman named Project 4 Books Management 
+- To test these apis create a new collection in Postman named Project 5 Shopping Cart
 - Each api should have a new request in this collection
-- Each request in the collection should be rightly named. Eg Create user, Create book, Get books etc
+- Each request in the collection should be rightly named. Eg Create user, Create product, Get products etc
 - Each member of each team should have their tests in running state
 
 Refer below sample
@@ -169,152 +396,86 @@ Refer below sample
 ```yaml
 {
   _id: ObjectId("88abc190ef0288abc190ef02"),
-  title: "Mr",
-  name: "John Doe",
-  phone: 9897969594,
-  email: "johndoe@mailinator.com", 
-  password: "abcd1234567",
+  fname: 'John',
+  lname: 'Doe',
+  email: 'johndoe@mailinator.com',
+  profileImage: 'http://function-up-test.s3.amazonaws.com/users/user/johndoe.jpg', // s3 link
+  phone: 9876543210,
+  password: '$2b$10$O.hrbBPCioVm237nAHYQ5OZy6k15TOoQSFhTT.recHBfQpZhM55Ty', // encrypted password
   address: {
-    street: "110, Ridhi Sidhi Tower",
-    city: "Jaipur",
-    pincode: "400001"
+    shipping: {
+      street: "110, Ridhi Sidhi Tower",
+      city: "Jaipur",
+      pincode: 400001
+    }, {mandatory}
+    billing: {
+      street: "110, Ridhi Sidhi Tower",
+      city: "Jaipur",
+      pincode: 400001
+    }
   },
-  "createdAt": "2021-09-17T04:25:07.803Z",
-  "updatedAt": "2021-09-17T04:25:07.803Z",
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
 }
 ```
-### books
+### products
 ```yaml
 {
-  "_id": ObjectId("88abc190ef0288abc190ef55"),
-  "title": "How to win friends and influence people",
-  "excerpt": "book body",
-  "userId": ObjectId("88abc190ef0288abc190ef02"),
-  "ISBN": "978-0008391331",
-  "category": "Book",
-  "subcategory": "Non fiction",
-  "isDeleted": false,
-  "reviews": 0,
-  "releasedAt": "2021-09-17"
-  "createdAt": "2021-09-17T04:25:07.803Z",
-  "updatedAt": "2021-09-17T04:25:07.803Z",
+  _id: ObjectId("88abc190ef0288abc190ef55"),
+  title: 'Nit Grit',
+  description: 'Dummy description',
+  price: 23.0,
+  currencyId: 'INR',
+  currencyFormat: '₹',
+  isFreeShipping: false,
+  productImage: 'http://function-up-test.s3.amazonaws.com/products/product/nitgrit.jpg',  // s3 link
+  style: 'Colloar',
+  availableSizes: ["S", "XS","M","X", "L","XXL", "XL"],
+  installments: 5,
+  deletedAt: null, 
+  isDeleted: false,
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
 }
 ```
 
-### reviews
+### carts
 ```yaml
 {
   "_id": ObjectId("88abc190ef0288abc190ef88"),
-  bookId: ObjectId("88abc190ef0288abc190ef55"),
-  reviewedBy: "Jane Doe",
-  reviewedAt: "2021-09-17T04:25:07.803Z",
-  rating: 4,
-  review: "An exciting nerving thriller. A gripping tale. A must read book."
+  userId: ObjectId("88abc190ef0288abc190ef02"),
+  items: [{
+    productId: ObjectId("88abc190ef0288abc190ef55"),
+    quantity: 2
+  }, {
+    productId: ObjectId("88abc190ef0288abc190ef60"),
+    quantity: 1
+  }],
+  totalPrice: 50.99,
+  totalItems: 2,
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
 }
 ```
 
-## Response examples
-### Get books response
+### orders
 ```yaml
 {
-  status: true,
-  message: 'Books list',
-  data: [
-    {
-      "_id": ObjectId("88abc190ef0288abc190ef55"),
-      "title": "How to win friends and influence people",
-      "excerpt": "book body",
-      "userId": ObjectId("88abc190ef0288abc190ef02")
-      "category": "Book",
-      "reviews": 0,
-      "releasedAt": "2021-09-17T04:25:07.803Z"
-    },
-    {
-      "_id": ObjectId("88abc190ef0288abc190ef56"),
-      "title": "How to win friends and influence people",
-      "excerpt": "book body",
-      "userId": ObjectId("88abc190ef0288abc190ef02")
-      "category": "Book",
-      "reviews": 0,
-      "releasedAt": "2021-09-17T04:25:07.803Z"
-    }
-  ]
-}
-```
-
-### Book details response
-```yaml
-{
-  status: true,
-  message: 'Books list',
-  data: {
-    "_id": ObjectId("88abc190ef0288abc190ef55"),
-    "title": "How to win friends and influence people",
-    "excerpt": "book body",
-    "userId": ObjectId("88abc190ef0288abc190ef02")
-    "category": "Book",
-    "subcategory": ["Non fiction", "Self Help"],
-    "isDeleted": false,
-    "reviews": 4,
-    "releasedAt": "2021-09-17T04:25:07.803Z"
-    "createdAt": "2021-09-17T04:25:07.803Z",
-    "updatedAt": "2021-09-17T04:25:07.803Z",
-    "reviewsData": [
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef88"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      },
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef89"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      },
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef90"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      },
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef91"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      }, 
-    ]
-  }
-}
-```
-
-### Book details response no reviews
-```yaml
-{
-  status: true,
-  message: 'Books list',
-  data: {
-    "_id": ObjectId("88abc190ef0288abc190ef55"),
-    "title": "How to win friends and influence people",
-    "excerpt": "book body",
-    "userId": ObjectId("88abc190ef0288abc190ef02")
-    "category": "Book",
-    "subcategory": "Non fiction", "Self Help"],
-    "isDeleted": false,
-    "reviews": 0,
-    "releasedAt": "2021-09-17"
-    "createdAt": "2021-09-17T04:25:07.803Z",
-    "updatedAt": "2021-09-17T04:25:07.803Z",
-    "reviewsData": []
-  }
+  "_id": ObjectId("88abc190ef0288abc190ef88"),
+  userId: ObjectId("88abc190ef0288abc190ef02"),
+  items: [{
+    productId: ObjectId("88abc190ef0288abc190ef55"),
+    quantity: 2
+  }, {
+    productId: ObjectId("88abc190ef0288abc190ef60"),
+    quantity: 1
+  }],
+  totalPrice: 50.99,
+  totalItems: 2,
+  totalQuantity: 3,
+  cancellable: true,
+  status: 'pending'
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
 }
 ```

@@ -1,5 +1,5 @@
 {
-  "name": "book-management",
+  "name": "products_management",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,16 +8,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/monishamittal/book-management.git"
+    "url": "https://github.com/Sagarpatel14/Project-5-product-management.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/monishamittal/book-management/issues"
+    "url": "https://github.com/Sagarpatel14/Project-5-product-management.git"
   },
-  "homepage": "https://github.com/monishamittal/book-management#readme",
+  "homepage": "",
   "dependencies": {
+    "aws-sdk": "^2.1181.0",
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
     "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",
