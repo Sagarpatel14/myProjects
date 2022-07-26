@@ -3,35 +3,55 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
 
     fname: {
-        type: string,
-        required: true
+        type: String,
+        required: true,
+        lowercase: true,
+        trim:true
     },
     lname: {
-        type: string,
-        required: true
+        type: String,
+        required: true,
+        lowercase: true,
+        trim:true
     },
     email: {
-        type: string,
+        type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true,
+        trim:true
     },
-    profileImage: { type: string, required: true }, // s3 link
+    profileImage: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim:true
+    }, // s3 link
     phone: {
-        type: string,
+        type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true,
+        trim:true
     },
-    password: { type: string, required: true, minLen: 8, maxLen: 15 }, // encrypted password
+    password: {
+        type: String,
+        required: true,
+        lowercase: true,
+        minLen: 8,
+        maxLen: 15,
+        trim:true
+    }, // encrypted password
     address: {
         shipping: {
-            street: { type: string, required: true },
-            city: { type: string, required: true },
-            pincode: { type: number, required: true }
+            street: { type: String, required: true, lowercase: true,trim:true },
+            city: { type: String, required: true, lowercase: true,trim:true },
+            pincode: { type: Number, required: true, lowercase: true,trim:true }
         },
         billing: {
-            street: { type: string, required: true },
-            city: { type: string, required: true },
-            pincode: { type: number, required: true }
+            street: { type: String, required: true, lowercase: true,trim:true },
+            city: { type: String, required: true, lowercase: true,trim:true },
+            pincode: { type: Number, required: true, lowercase: true,trim:true }
         }
     },
 
