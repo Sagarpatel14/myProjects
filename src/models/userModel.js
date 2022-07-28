@@ -3,35 +3,35 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
 
     fname: {
-        type: string,
+        type: String,
         required: true
     },
     lname: {
-        type: string,
+        type: String,
         required: true
     },
     email: {
-        type: string,
+        type: String,
         required: true,
         unique: true
     },
-    profileImage: { type: string, required: true }, // s3 link
+    profileImage: { type: String, required: true }, // s3 link
     phone: {
-        type: string,
+        type: String,
         required: true,
         unique: true
     },
-    password: { type: string, required: true, minLen: 8, maxLen: 15 }, // encrypted password
+    password: { type: String, required: true, minLen: 8, maxLen: 15 }, // encrypted password
     address: {
         shipping: {
-            street: { type: string, required: true },
-            city: { type: string, required: true },
-            pincode: { type: number, required: true }
+            street: { type: String, required: true },
+            city: { type: String, required: true },
+            pincode: { type: Number, required: true }
         },
         billing: {
-            street: { type: string, required: true },
-            city: { type: string, required: true },
-            pincode: { type: number, required: true }
+            street: { type: String, required: true },
+            city: { type: String, required: true },
+            pincode: { type: Number, required: true }
         }
     },
 
