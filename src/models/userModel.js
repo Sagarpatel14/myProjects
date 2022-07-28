@@ -13,13 +13,17 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true,
+        trim:true
     },
     profileImage: { type: String, required: true }, // s3 link
     phone: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true,
+        trim:true
     },
     password: { type: String, required: true, minLen: 8, maxLen: 15 }, // encrypted password
     address: {

@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const route = require('./route/route')
+const multer = require('multer')
 
 const app = express()
 app.use(multer().any())
