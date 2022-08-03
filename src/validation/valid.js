@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 
-const isValid = (value) => {
-    if (typeof value == 'undefined' || value == null) return false
-    if (typeof value == 'string' && value.trim().length == 0) return false
-    if (typeof value == 'number' && value.toString().trim().length == 0) return false
+const isValid = function (value) {
+    if (typeof value === "undefined" || typeof value === "null") return false
+    if (typeof value === "string" && value.trim().length === 0) return false
+    if (value == null) return false
     return true
 }
 
@@ -70,10 +70,29 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
+
+const isImageFile = function (files) {
+    let imageRegex = /.*\.(jpeg|jpg|png|gif|JPGE|JPG|PNG|GIF)$/;
+    return imageRegex.test(files)
+}
+
+const isValidSize = (Size) => {
+    let correctSize = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    return (correctSize.includes(Size))
+}
+
 const isValidPrice = function(price){
     if(/^(\d*([.,](?=\d{3}))?\d+)+((?!\2)[.,]\d\d)?$/.test(price))
         return true
 }
 
+const validInstallment = function(price){
+    if(/^[1-9]{1,6}$/.test(price))
+        return true
+}
+const isValidLimit = function(price){
+    if(/^[1-9]{1,2}$/.test(price))
+        return true
+}
 
-module.exports = { isValid,isValidPrice, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength,isValidTName}
+module.exports = { validInstallment,isValidLimit,isValidPrice,isValidSize,isImageFile, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName }

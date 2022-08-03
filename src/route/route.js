@@ -1,20 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController')
-<<<<<<< HEAD
+const productController = require('../controllers/productController')
+const cartController = require('../controllers/cartController')
 
 router.post('/register', userController.createUser)
 router.put('/user/:userId/profile', userController.updateUser)
-=======
-const productController = require('../controllers/productController')
-
-router.post('/register',userController.createUser)
 
 
-// router product
-router.post('/products',productController.createProduct)
+router.post('/products', productController.createProduct)
+router.get('/products', productController.getProduct)
+router.get('/products/:productId', productController.getProductById)
+router.put('/products/:productId', productController.updateProduct)
+router.delete('/products/:productId', productController.deleteProduct)
 
->>>>>>> 21b1e762858a224b79a27bf63c08930976363d9e
+router.post('/users/:userId/cart', cartController.createCart)
+router.put('/users/:userId/cart', cartController.updateCart)
+router.get('/users/:userId/cart', cartController.getCart)
+router.delete('/users/:userId/cart', cartController.deleteCart)
+
 
 router.all('/*/', async function(req, res){
     res.status(404).send({status: false, msg: "Page Not Found!!!"})

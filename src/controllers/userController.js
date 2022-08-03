@@ -1,6 +1,6 @@
 const userModel = require('../models/userModel') // require userModel
 //<===========require Validation and destructing==============================================>
-const { isValid, isValidName, isValidEmail, isValidMobile, isValidPassword, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName } = require('../validation/valid')
+const { validInstallment,isValidPrice,isValidSize,isImageFile, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName } = require('../validation/valid')
 
 const aws = require("aws-sdk")//require Clouding
 const bcrypt = require('bcrypt');//require password bcrypt
@@ -142,6 +142,62 @@ const createUser = async function (req, res) {
 }
 
 
+
+
+const loginUser = async function (req, res) {
+    try {
+
+        let body = req.body
+
+        if (Object.keys(body).length === 0) { return res.status(400).send({ Status: false, message: " Sorry Body can't be empty" }) }
+
+
+
+
+        //*------------------- Email validation -------------------*** //
+
+        if (!isValid(body.email)) { return res.status(400).send({ status: false, msg: "Email is required" }) };
+
+        // For a Valid Email...
+        if (!isValidEmail(body.email.trim())) { return res.status(400).send({ status: false, message: ' Email should be a valid' }) };
+
+        //**------------------- password validation -------------------** //
+
+        if (!isValid(body.password)) { return res.status(400).send({ Status: false, message: " password is required" }) }
+
+        //**------------------- checking User Detail -------------------** //
+        let checkUser = await userModel.findOne({ email: body.email });
+        if (!checkUser) { return res.status(401).send({ Status: false, message: "email is not correct" }); }
+
+        let passwordMatch = await bcrypt.compare(body.password, checkUser.password)
+        if ((!passwordMatch).trim) { return res.status(401).send({ status: false, msg: "incorect password" }) }
+        //**------------------- generating token for user -------------------** //
+        let userToken = jwt.sign({ UserId: checkUser._id, batch: "Radon" }, 'FunctionUp Group30', { expiresIn: '86400s' }); // token expiry for 24hrs
+        return res.status(200).send({ status: true, message: "User login successfull", data: { userId: checkUser._id, token: userToken } });
+    } catch (err) {
+        res.status(500).send({ status: false, msg: err.message })
+    }
+}
+
+const getUser = async function (req, res) {
+    try {
+        //---------reading userid from ----//
+        const _id = req.params.userId;
+
+        //------id format validation-------//
+        if (_id) { if (!isValidObjectId(_id)) { return res.status(400).send({ status: false, message: "Invalid userId" }); } }
+
+        const user = await userModel.findOne({ _id: _id }, { isDeleted: false })
+        //------no users found-------//
+        if (!user) { return res.status(404).send({ status: false, message: "user not found" }); }
+        //------return user in response------//
+        return res.status(200).send({ status: true, message: "Success", data: user });
+
+    } catch (error) { res.status(500).send({ status: false, msg: error.message }) }
+}
+
+
+
         
 
 const updateUser = async function (req, res) {
@@ -266,4 +322,4 @@ const updateUser = async function (req, res) {
 }
 
 
-module.exports = { createUser, updateUser }
+module.exports = { createUser,loginUser,getUser, updateUser }
