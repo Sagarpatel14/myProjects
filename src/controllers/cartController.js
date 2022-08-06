@@ -130,7 +130,7 @@ const getCart = async function(req, res) {
             return res.status(400).send({ status: false, msg: ` this ${userId} is invalid userId` })
         }
         let checkUser = await cartModel.findOne({ userId: userId })
-        console.log(checkUser)
+        //console.log(checkUser)
         if (!checkUser) {
             return res.status(404).send({ status: false, msg: 'user not found' })
         }
@@ -152,7 +152,7 @@ const deleteCart = async function(req, res) {
         }
         //check if the document is found with that user id 
         let checkUser = await userModel.findOne({ _id: user_id }, { isDeleted: false })
-        console.log(checkUser)
+        //console.log(checkUser)
         if (!checkUser) { return res.status(404).send({ status: false, msg: "user not found" }) }
 
         let checkId = await cartModel({ userId: user_id })

@@ -1,18 +1,17 @@
 const userModel = require('../models/userModel') // require userModel
-//<===========require Validation and destructing==============================================>
-const { validInstallment,isValidPrice,isValidSize,isImageFile, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName } = require('../validation/valid')
-
 const aws = require("aws-sdk")//require Clouding
 const bcrypt = require('bcrypt');//require password bcrypt
 const { uploadFile } = require('../validation/aws')
+const jwt = require('jsonwebtoken')
 
+const { validInstallment, isValidPrice, isValidSize, isImageFile, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName } = require('../validation/valid')
 //<==================================user Create =======================================>
 const createUser = async function (req, res) {
     try {
         const body = req.body
         // console.log(body)
         //<==========================body Check =============================================>
-        if (isValidBody(body)) return res.status(400).send({ status: false, message: "Please provied Data" })
+        if (isValidBody(body)) return res.status(400).send({ status: false, message: "Please enter body" })
         const { fname, lname, email, profileImage, phone, password, address, shipping, billing } = body
 
 
@@ -20,14 +19,14 @@ const createUser = async function (req, res) {
         //<=============================first Name check=========================================>
         if (!isValid(fname)) return res.status(400).send({ status: false, messge: "please provide First Name" })
 
-        if (!isValidName(fname)) return res.status(400).send({ status: false, messge: "please Give Correct First Name" })
+        if (!isValidName(fname)) return res.status(400).send({ status: false, messge: "please Give valid First Name" })
 
 
 
         //<=========================Last name Check==========================================>
         if (!isValid(lname)) return res.status(400).send({ status: false, message: "please provide last Name" })
 
-        if (!isValidName(lname)) return res.status(400).send({ status: false, messge: "please Give Correct last Name" })
+        if (!isValidName(lname)) return res.status(400).send({ status: false, messge: "please Give valid last Name" })
 
 
 
@@ -36,21 +35,24 @@ const createUser = async function (req, res) {
 
 
         //<==============================valid Email Id=======================================>
-        if (!isValidEmail(email)) return res.status(400).send({ status: false, message: "please given Valid Email" })
+        if (!isValidEmail(email)) return res.status(400).send({ status: false, message: "please give Valid Email" })
 
 
 
         //<=============================check Unique =========================================>
         const isAlreadyEmail = await userModel.findOne({ email: email })
-        if (isAlreadyEmail) return res.status(400).send({ status: false, message: "Email is already in Used" })
+        if (isAlreadyEmail) return res.status(400).send({ status: false, message: "Email is already exist" })
 
 
 
         //<===================================>profileImage with Clouding<==========================>
         let files = req.files
+        //console.log(files);
         if (!(files && files.length > 0)) {
             return res.status(400).send({ status: false, message: " Please Provide The Profile Image" });
         }
+        if (!isImageFile(files[0].originalname)) return res.status(400).send({ status: false, message: " Please Provide The Profile Image in jpeg,jpg,png,gif,JPGE,JPG,PNG,GIF" });
+
         const uploadedBookImage = await uploadFile(files[0])
         body.profileImage = uploadedBookImage
 
@@ -62,19 +64,19 @@ const createUser = async function (req, res) {
 
         //=====================================unique Check=========================================>
         const isAlreadyPhone = await userModel.findOne({ phone: phone })
-        if (isAlreadyPhone) return res.status(400).send({ status: false, message: "Phone Number is already in Used" })
+        if (isAlreadyPhone) return res.status(400).send({ status: false, message: "Phone Number is already exist" })
 
 
         //====================================valid Indian mobile number============================>
-        if (!isValidMobile(phone)) return res.status(400).send({ status: false, message: "please given Valid Phone Number" })
+        if (!isValidMobile(phone)) return res.status(400).send({ status: false, message: "please give Valid Phone Number" })
 
 
         //====================================password==============================================>
-        if (!password) return res.status(400).send({ status: false, message: "please given password" })
+        if (!password) return res.status(400).send({ status: false, message: "please give password" })
 
 
         //======================================password validation ==================================>
-        if (!isValidPassword(password)) return res.status(400).send({ status: false, message: "please give proper Password" })
+        if (!isValidPassword(password)) return res.status(400).send({ status: false, message: "the password should be of 8 to 15 character and should atleast contains one lowercase, one upercase, one special character and one number" })
 
 
         //======================================password Hashing============================================>
@@ -90,8 +92,17 @@ const createUser = async function (req, res) {
         if (!address || Object.keys(address).length === 0) {
             return res.status(400).send({ status: false, message: "Please enter address and it should be in object!!" })
         }
-        let addresss = JSON.parse(address)
-        // console.log(addresss);
+
+        let addresss;
+        if (address) {
+            try {
+                addresss = JSON.parse(address);
+            } catch (e) {
+                return res.status(400).send({ status: false, message: 'address should be an object' })
+            }
+        }
+
+
         //<========================================shipping street=========================================>
         if (!addresss.shipping.street) return res.status(400).send({ status: false, message: "please provide street" })
         if (!isValid(addresss.shipping.street)) return res.status(400).send({ status: false, message: "please Don't leave empty Street" })
@@ -137,6 +148,7 @@ const createUser = async function (req, res) {
         res.status(201).send({ status: true, message: "User created successfully", data: createUserDetails })
     }
     catch (error) {
+        console.log(error)
         return res.status(500).send({ status: false, message: error.message })
     }
 }
@@ -148,29 +160,26 @@ const loginUser = async function (req, res) {
     try {
 
         let body = req.body
+        let { email, password } = body
 
-        if (Object.keys(body).length === 0) { return res.status(400).send({ Status: false, message: " Sorry Body can't be empty" }) }
-
-
-
+        if (isValidBody(body)) return res.status(400).send({ Status: false, message: " Sorry Body can't be empty" })
 
         //*------------------- Email validation -------------------*** //
 
-        if (!isValid(body.email)) { return res.status(400).send({ status: false, msg: "Email is required" }) };
-
-        // For a Valid Email...
-        if (!isValidEmail(body.email.trim())) { return res.status(400).send({ status: false, message: ' Email should be a valid' }) };
+        if (!('email' in body)) return res.status(400).send({ status: false, msg: "Email is required" })
+        if (!isValid(email)) { return res.status(400).send({ status: false, msg: "do not leave email empty" }) };
+        if (!isValidEmail(email)) { return res.status(400).send({ status: false, message: ' Email should be a valid' }) };
 
         //**------------------- password validation -------------------** //
-
-        if (!isValid(body.password)) { return res.status(400).send({ Status: false, message: " password is required" }) }
+        if (!('password' in body)) return res.status(400).send({ status: false, msg: "password is required" })
+        if (!isValid(password)) { return res.status(400).send({ Status: false, message: "do not leave password empty" }) }
 
         //**------------------- checking User Detail -------------------** //
-        let checkUser = await userModel.findOne({ email: body.email });
+        let checkUser = await userModel.findOne({ email });
         if (!checkUser) { return res.status(401).send({ Status: false, message: "email is not correct" }); }
 
-        let passwordMatch = await bcrypt.compare(body.password, checkUser.password)
-        if ((!passwordMatch).trim) { return res.status(401).send({ status: false, msg: "incorect password" }) }
+        let passwordMatch = await bcrypt.compare(password, checkUser.password)
+        if (passwordMatch == false) { return res.status(401).send({ status: false, msg: "incorect password" }) }
         //**------------------- generating token for user -------------------** //
         let userToken = jwt.sign({ UserId: checkUser._id, batch: "Radon" }, 'FunctionUp Group30', { expiresIn: '86400s' }); // token expiry for 24hrs
         return res.status(200).send({ status: true, message: "User login successfull", data: { userId: checkUser._id, token: userToken } });
@@ -178,6 +187,8 @@ const loginUser = async function (req, res) {
         res.status(500).send({ status: false, msg: err.message })
     }
 }
+
+
 
 const getUser = async function (req, res) {
     try {
@@ -198,7 +209,7 @@ const getUser = async function (req, res) {
 
 
 
-        
+
 
 const updateUser = async function (req, res) {
     try {
@@ -208,48 +219,54 @@ const updateUser = async function (req, res) {
         let user = await userModel.findById(userId)
         if (!user) return res.status(404).send({ status: false, message: 'sorry, No such user exists with this Id' })
 
-        let body = req.body;
-        let { fname, lname, email, profileImage, phone, password, address, shipping, billing } = body;
+        let body = req.body; 
+        
+        console.log(body)
+        let { fname, lname, email, phone, password, address, shipping, billing } = body;
+        let files = req.files
         if (Object.keys(body).length === 0 && req.files == undefined) return res.status(400).send({ status: false, message: 'please enter body' })
-       // pending work in files isvalidfiles
-       //if (isValidBody(body)) return res.status(400).send({ status: false, message: 'please enter body' })
+        // pending work in files isvalidfiles
+        //if (isValidBody(body)) return res.status(400).send({ status: false, message: 'please enter body' })
 
         let obj = {};
-        if(fname =="") return res.status(400).send({status:false, message: "Don't leave fname Empty"})
+        if (fname == "") return res.status(400).send({ status: false, message: "Don't leave fname Empty" })
         if (fname) {
             if (!isValid(fname)) return res.status(400).send({ status: false, message: "Don't leave fname Empty" })
             if (!isValidName(fname)) return res.status(400).send({ status: false, message: "Pls Enter Valid fname" })
-            obj.fname = fname
+            obj.fname = fname.trim().toLowerCase()
         }
-        if(lname =="") return res.status(400).send({status:false, message: "Don't leave lname Empty"})
+        if (lname == "") return res.status(400).send({ status: false, message: "Don't leave lname Empty" })
         if (lname) {
             if (!isValid(lname)) return res.status(400).send({ status: false, message: "Don't leave lname Empty" })
             if (!isValidName(lname)) return res.status(400).send({ status: false, message: "Pls Enter Valid lname" })
-            obj.lname = lname
+            obj.lname = lname.trim().toLowerCase()
         }
-        if(email =="") return res.status(400).send({status:false, message: "Don't leave email Empty"})
+        if (email == "") return res.status(400).send({ status: false, message: "Don't leave email Empty" })
         if (email) {
             if (!isValid(email)) return res.status(400).send({ status: false, message: "Don't leave email Empty" })
             if (!isValidEmail(email)) return res.status(400).send({ status: false, message: "Pls Enter Valid email" })
             if (await userModel.findOne({ email })) return res.status(400).send({ status: false, message: "this email has already been used" })
-            obj.email = email
+            obj.email = email.trim()
         }
-        if (profileImage) {
-            let files = req.files
-            if (!(files && files.length > 0)) {
+        if (files.length != 0) {
+            
+            if (files.length == 0) {
                 return res.status(400).send({ status: false, message: " Please Provide The Profile Image" });
             }
+            if (!isImageFile(files[0].originalname)) return res.status(400).send({ status: false, message: " Please Provide The Profile Image in jpeg,jpg,png,gif,JPGE,JPG,PNG,GIF" });
+    
             const uploadedBookImage = await uploadFile(files[0])
             obj.profileImage = uploadedBookImage
+    
         }
-        if(phone =="") return res.status(400).send({status:false, message: "Don't leave phone Empty"})
+        if (phone == "") return res.status(400).send({ status: false, message: "Don't leave phone Empty" })
         if (phone) {
             if (!isValid(phone)) return res.status(400).send({ status: false, message: "Don't leave phone number Empty" })
             if (!isValidMobile(phone)) return res.status(400).send({ status: false, message: "Pls Enter Valid phone number" })
             if (await userModel.findOne({ phone })) return res.status(400).send({ status: false, message: "this phone number has already been used" })
-            obj.phone = phone
+            obj.phone = phone.trim()
         }
-        if(password =="") return res.status(400).send({status:false, message: "Don't leave password Empty"})
+        if (password == "") return res.status(400).send({ status: false, message: "Don't leave password Empty" })
         if (password) {
             if (!isValid(password)) return res.status(400).send({ Status: false, message: " password is required" })
             if (!isValidPassword(password)) return res.status(400).send({ Status: false, message: " Please enter a valid password, minlength 8, maxxlength 15" })
@@ -259,7 +276,7 @@ const updateUser = async function (req, res) {
             bcryptedPassword = await bcrypt.hash(password, salt);
             obj["password"] = bcryptedPassword
         }
-        if(address =="") return res.status(400).send({status:false, message: "Don't leave address Empty"})
+        if (address == "") return res.status(400).send({ status: false, message: "Don't leave address Empty" })
         if ("address" in body) {
             // address = JSON.stringify(address)
             //address = JSON.parse(address)
@@ -268,8 +285,14 @@ const updateUser = async function (req, res) {
             if (!address || Object.keys(address).length === 0) {
                 return res.status(400).send({ status: false, message: "Please enter address and it should be in object!!" })
             }
-            //  address = JSON.stringify(address)
-            let addresss = JSON.parse(address)
+            let addresss;
+            if (address) {
+                try {
+                    addresss = JSON.parse(address);
+                } catch (e) {
+                    return res.status(400).send({ status: false, message: 'address should be an object' })
+                }
+            }
             const { shipping, billing } = addresss
             if ("shipping" in addresss) {
                 const { street, city, pincode } = shipping
@@ -281,8 +304,8 @@ const updateUser = async function (req, res) {
                 }
                 if ("city" in shipping) {
                     if (!isValid(city)) return res.status(400).send({ status: false, message: "city is not valid" })
-                    if(!isValidName(city)) return res.status(400).send({ status: false, message: "city name is not in valid format" })
-                    
+                    if (!isValidName(city)) return res.status(400).send({ status: false, message: "city name is not in valid format" })
+
                     obj["addresss.shipping.city"] = city
                 }
                 if ("pincode" in shipping) {
@@ -301,7 +324,7 @@ const updateUser = async function (req, res) {
 
                 if ("city" in billing) {
                     if (!isValid(city)) return res.status(400).send({ status: false, message: "city is not valid" })
-                    if(!isValidName(city)) return res.status(400).send({ status: false, message: "city name is not in valid format" })
+                    if (!isValidName(city)) return res.status(400).send({ status: false, message: "city name is not in valid format" })
                     obj["addresss.billing.city"] = city
                 }
                 if ("pincode" in billing) {
@@ -317,9 +340,10 @@ const updateUser = async function (req, res) {
         res.status(200).send({ status: true, message: "User profile updated", data: updatedUser })
 
     } catch (error) {
+        console.log(error)
         res.status(500).send({ status: false, message: error.message })
-   }
+    }
 }
 
 
-module.exports = { createUser,loginUser,getUser, updateUser }
+module.exports = { createUser, loginUser, getUser, updateUser }
