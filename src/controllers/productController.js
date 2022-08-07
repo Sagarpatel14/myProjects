@@ -15,7 +15,7 @@ const createProduct = async function (req, res) {
 
         //===================================distructing======================================>
 
-        let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments } = body
+        let { title, description, price, currencyId, style, availableSizes, installments } = body
 
 
 
@@ -54,10 +54,8 @@ const createProduct = async function (req, res) {
 
 
         //======================================== currencyFormat====================================>
-
-        if (!isValid(currencyFormat)) return res.status(400).send({ status: false, message: "please provide currencyFormat" })
-
-        if (currencyFormat != "₹") return res.status(400).send({ status: false, message: "currencyFormat should only be ₹ " })
+        
+        body.currencyFormat = "₹"
 
 
         //========================================productImage=======================================>
@@ -72,7 +70,7 @@ const createProduct = async function (req, res) {
 
         //===========================================style============================================>
 
-        // 
+        if(style = "") return res.status(400).send({ status: false, message: "please do not leave style field empty" })
         if (style) {
             if (!isValid(style)) return res.status(400).send({ status: false, message: "please provide style in correct form" })
 
@@ -121,7 +119,7 @@ const createProduct = async function (req, res) {
 const getProduct = async function (req, res) {
     try {
         let data = req.query;
-        let filter = { isDeleted: false }
+        let filter = {isDeleted:false}
 
         if (data.name || data.name === "") {
             if (!isValid(data.name)) return res.status(400).send({ status: false, message: "Enter the product name required" })
@@ -192,7 +190,7 @@ const getProduct = async function (req, res) {
         }
 
         let sortedPrice = data.priceSort;
-        if (sortedPrice.trim() == "") return res.status(400).send({ status: false, message: "please do not leave sortedPrice empty" })
+        if (sortedPrice == "") return res.status(400).send({ status: false, message: "please do not leave sortedPrice empty" })
         if (sortedPrice) {
             if (!sortedPrice.match(/^(1|-1)$/)) {
                 return res.status(400).send({ status: false, message: "priceSort should be 1 or -1" })
@@ -201,12 +199,10 @@ const getProduct = async function (req, res) {
 
 
         //console.log(filter);
-        let get = await productModel.find(filter).sort({ price: sortedPrice })
-        if (get) {
-            return res.status(200).send({ status: true, message: "success", data: get })
-        }
-        return res.status(400).send({ status: false, message: "No product found" })
-
+        let getData = await productModel.find(filter).sort({ price: sortedPrice })
+        if (!getData) return res.status(404).send({ status: false, message: "No product found" })
+        
+        res.status(200).send({ status: true, message: "success", data: getData })
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
@@ -228,11 +224,11 @@ const getProductById = async function (req, res) {
         const product_id = req.params.productId;
 
         //id validation============================================================//
-        if (!isValidObjectId(product_id)) { return res.status(400).send({ status: false, message: `This ${product_id} is invalid productId` }); }
+        if (!isValidObjectId(product_id)) { return res.status(400).send({ status: false, message: 'Invalid product Id' }); }
 
         const product = await productModel.findOne({ _id: product_id, isDeleted: false })
         // product not found===================================================//
-        if (!product) { return res.status(404).send({ status: false, message: "Product not found" }); }
+        if (!product) { return res.status(404).send({ status: false, message: "Product not found or might be deleted" }); }
 
         //return product in response===============================================//
         return res.status(200).send({ status: true, message: "Success", data: product });
@@ -252,11 +248,12 @@ const updateProduct = async function (req, res) {
         let productId = req.params.productId;
         let body = req.body;
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = body;
+        let files = req.files
         if (!productId) return res.status(400).send({ status: false, message: 'pls give a productId in params' })
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: 'pls give a valid productId in params' })
         let product = await productModel.findById(productId)
         if (!product) return res.status(404).send({ status: false, message: 'No product found with product id in params' })
-        if (!(product.isDeleted == false)) return res.status(400).send({ status: false, message: 'sorry, the product is already deleted' })
+        if (!(product.isDeleted == false)) return res.status(404).send({ status: false, message: 'sorry, the product is already deleted' })
 
         if (Object.keys(body).length === 0 && req.files == undefined) return res.status(400).send({ status: false, message: 'please enter body' })
         let sizes = ["S", "XS", "M", "X", "L", "XXL", "XL"]
@@ -285,11 +282,11 @@ const updateProduct = async function (req, res) {
         }
         if (isFreeShipping == "") return res.status(400).send({ status: false, message: "Don't leave isFreeShipping Empty" })
         if (isFreeShipping) {
-            if (typeof isFreeShipping !== "boolean") return res.status(400).send({ status: false, message: 'type of isFreeShipping should be boolean' })
+            if (!(isFreeShipping=="true" || isFreeShipping=="false")) return res.status(400).send({ status: false, message: 'type of isFreeShipping should be boolean' })
             obj.isFreeShipping = isFreeShipping
         }
-        if (productImage) {
-            let files = req.files
+        if (files.length != 0) {
+            //let files = req.files
             if (!(files && files.length > 0)) {
                 return res.status(400).send({ status: false, message: " Please Provide The product Image" });
             }

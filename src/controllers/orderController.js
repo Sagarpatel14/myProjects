@@ -14,15 +14,15 @@ const createOrder = async function (req, res) {
 
         if (isValidBody(body)) return res.status(400).send({ status: false, message: 'please enter body' })
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: 'Invalid userId' })
-        if(await orderModel.findOne({userId})) return res.status(409).send({status:false, message:'Already a order exist with this userId'})
         if (!(await userModel.findById(userId))) return res.status(404).send({ status: false, message: 'No user found, with userId' })
-        if (!(await cartModel.findOne({ userId }))) return res.status(404).send({ status: false, message: 'No cart found, with userId' })
-
+        //if (!(await cartModel.findOne({ userId }))) return res.status(404).send({ status: false, message: 'No cart found, with userId' })
+        
         if (!("cartId" in body)) return res.status(400).send({ status: false, message: 'please, give cartId in body, it is required' })
         if (!isValid(cartId)) return res.status(400).send({ status: false, message: 'please do not leave cartId empty' })
         if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: 'Invalid cartId' })
-        let cart = await cartModel.findById(cartId)
-        if (!cart) return res.status(404).send({ status: false, message: 'No cart found, with cartId' })
+        let cart = await cartModel.findOne({_id:cartId,userId})
+        if (!cart) return res.status(404).send({ status: false, message: 'No cart found, with cartId and userId' })
+        if(await orderModel.findOne({userId})) return res.status(409).send({status:false, message:'Already a order exist with this userId'})
         let items = cart.items;
         let totalPrice = cart.totalPrice;
         let totalItems = cart.totalItems;
