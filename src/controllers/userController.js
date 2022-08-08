@@ -221,14 +221,14 @@ const updateUser = async function (req, res) {
 
         let body = req.body; 
         
-        console.log(body)
+        //console.log(body)
         let { fname, lname, email, phone, password, address, shipping, billing } = body;
         let files = req.files
         if (Object.keys(body).length === 0 && req.files == undefined) return res.status(400).send({ status: false, message: 'please enter body' })
         // pending work in files isvalidfiles
         //if (isValidBody(body)) return res.status(400).send({ status: false, message: 'please enter body' })
 
-        let obj = {};
+        let obj = await userModel.findOne({_id:userId})
         if (fname == "") return res.status(400).send({ status: false, message: "Don't leave fname Empty" })
         if (fname) {
             if (!isValid(fname)) return res.status(400).send({ status: false, message: "Don't leave fname Empty" })
@@ -300,18 +300,18 @@ const updateUser = async function (req, res) {
                     if (!isValid(street)) {
                         return res.status(400).send({ status: false, message: "street is not valid" })
                     }
-                    obj["addresss.shipping.street"] = street
+                    obj.address.shipping.street = street
                 }
                 if ("city" in shipping) {
                     if (!isValid(city)) return res.status(400).send({ status: false, message: "city is not valid" })
                     if (!isValidName(city)) return res.status(400).send({ status: false, message: "city name is not in valid format" })
 
-                    obj["addresss.shipping.city"] = city
+                    obj.address.shipping.city = city
                 }
                 if ("pincode" in shipping) {
                     if (!isValid(pincode)) return res.status(400).send({ status: false, message: "pincode is not valid" })
                     if (!isValidPincode(pincode)) return res.status(400).send({ status: false, message: "pincode is not in valid format" })
-                    obj["addresss.shipping.pincode"] = pincode
+                    obj.address.shipping.pincode = pincode
                 }
             }
 
@@ -319,25 +319,26 @@ const updateUser = async function (req, res) {
                 const { street, city, pincode } = billing
                 if ("street" in billing) {
                     if (!isValid(street)) return res.status(400).send({ status: false, message: "street is not valid" })
-                    obj["addresss.billing.street"] = street
+                    obj.address.billing.street = street
                 }
 
                 if ("city" in billing) {
                     if (!isValid(city)) return res.status(400).send({ status: false, message: "city is not valid" })
                     if (!isValidName(city)) return res.status(400).send({ status: false, message: "city name is not in valid format" })
-                    obj["addresss.billing.city"] = city
+                    obj.address.billing.city = city
                 }
                 if ("pincode" in billing) {
                     if (!isValid(pincode)) return res.status(400).send({ status: false, message: "shipping pincode is not valid" })
                     if (!isValidPincode(pincode)) return res.status(400).send({ status: false, message: "pincode is not in valid format" })
-                    obj["addresss.billing.pincode"] = pincode
+                    obj.address.billing.pincode = pincode
                 }
             }
-            obj["address"] = addresss
+            //obj.address = addresss
         }
+        obj.save()
 
-        let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: obj }, { new: true })
-        res.status(200).send({ status: true, message: "User profile updated", data: updatedUser })
+        //let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, obj, { new: true })
+        res.status(200).send({ status: true, message: "User profile updated", data: obj })
 
     } catch (error) {
         console.log(error)

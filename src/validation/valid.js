@@ -81,15 +81,15 @@ const isValidSize = (Size) => {
     return (correctSize.includes(Size))
 }
 
-const isValidPrice = function(price){
-    if(/^(\d*([.,](?=\d{3}))?\d+)+((?!\2)[.,]\d\d)?$/.test(price))
-        return true
-}
+function isValidPrice(str) {
+    return /^[0-9.]+$/.test(str);
+  }
+  
 
-const validInstallment = function(price){
-    if(/^[1-9]{1,6}$/.test(price))
-        return true
-}
+function validInstallment(str) {
+    return /^[0-9]+$/.test(str);
+  }
+  
 const isValidLimit = function(price){
     if(/^[1-9]{1,2}$/.test(price))
         return true

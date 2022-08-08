@@ -125,14 +125,12 @@ const getProduct = async function (req, res) {
             if (!isValid(data.name)) return res.status(400).send({ status: false, message: "Enter the product name required" })
             if (!isValidName(data.name)) return res.status(400).send({ status: false, messge: "please Give Correct name" })
 
-            filter.title = {};
+            //filter.title = {};
             filter.title = data.name;
             // console.log(filter.title)
         }
         if (data.size || data.size === "") {
-            if (!isValid(data.size)) {
-                return res.status(400).send({ status: false, message: "Give a proper size of products" })
-            }
+            if (!isValid(data.size)) return res.status(400).send({ status: false, message: "Give a proper size of products" })
             if (data.size) {
                 var size = data.size.toUpperCase().split(",")
                 if (size.length === 0) {
@@ -148,7 +146,7 @@ const getProduct = async function (req, res) {
             }
             filter.availableSizes = {};
             filter.availableSizes["$in"] = size
-            // console.log(filter.availableSizes)
+            //console.log(filter.availableSizes)
         }
         if (data.priceGreaterThan === "" || data.priceLessThan === "") {
             return res.status(400).send({ status: false, message: "price can not be empty" })
@@ -159,6 +157,7 @@ const getProduct = async function (req, res) {
                     return res.status(400).send({ status: false, message: "pricegreterthen can not be empty" })
                 }
                 let Gprice = Number(data.priceGreaterThan)
+                //console.log(Gprice)
                 if (!/^\d*\.?\d*$/.test(Gprice)) {
                     return res.status(400).send({ status: false, message: "price greaterthan should be in a number formate " })
                 }

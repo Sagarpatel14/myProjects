@@ -20,7 +20,7 @@ const createCart = async function (req, res) {
         
 
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "invalid user Id.." })
-        const isValidUser = await userModel.findById({ _id: userId })
+        const isValidUser = await userModel.findById(userId)
         if (!isValidUser) return res.status(404).send({ status: false, message: "user not found" })
 
 
@@ -41,7 +41,7 @@ const createCart = async function (req, res) {
         if (cart) {
             let productIds = cart.items.map(x => x.productId.toString())
             if (productIds.includes(productId)) {
-                let updatedCart = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: userId }, { $inc: { "items.$.quantity": 1, totalPrice: productPrice } }, { new: true })
+                let updatedCart = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: userId }, { $inc: { "items.quantity": 1, totalPrice: productPrice } }, { new: true })
                 return res.status(200).send({ status: true, message: "items added successfully", data: updatedCart })
             }
             else {

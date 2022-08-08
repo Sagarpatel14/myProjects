@@ -22,6 +22,7 @@ const createOrder = async function (req, res) {
         if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: 'Invalid cartId' })
         let cart = await cartModel.findOne({_id:cartId,userId})
         if (!cart) return res.status(404).send({ status: false, message: 'No cart found, with cartId and userId' })
+        if(cart.items.length==0) return res.status(404).send({ status: false, message: 'No cart found' })
         if(await orderModel.findOne({userId})) return res.status(409).send({status:false, message:'Already a order exist with this userId'})
         let items = cart.items;
         let totalPrice = cart.totalPrice;
@@ -67,6 +68,7 @@ const updateOrder = async function (req, res) {
         if (!isValidObjectId(orderId)) return res.status(400).send({ status: false, message: 'Invalid orderId' })
         let order = await orderModel.findOne({_id:orderId,userId:userId})
         if (!order) return res.status(404).send({ status: false, message: 'No order found, with orderId and userId' })
+        if(order.status == 'cancled') return res.status(400).send({ status: false, message: 'order already cancelled, can not be updated ' })
 
         let validStatus = ['pending', 'completed', 'cancled']
         if (!("status" in body)) return res.status(400).send({ status: false, message: 'please, give status key in body, it is required' })
