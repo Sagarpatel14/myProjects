@@ -10,7 +10,7 @@ let {authentication, authorization } = require('../middleWares/auth')
 //——————————————————————————————User APIs———————————————————————————————————————
 router.post('/register', userController.createUser)
 router.post('/login', userController.loginUser)
-router.get('/user/:userId/profile',authentication, userController.getUser)
+router.get('/user/:userId/profile',authentication,authorization, userController.getUser)
 router.put('/user/:userId/profile',authentication,authorization, userController.updateUser)
 
 //——————————————————————————————Product APIs———————————————————————————————————————
