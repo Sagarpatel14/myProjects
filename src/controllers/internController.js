@@ -20,6 +20,7 @@ const bodyValidator = function (data) {
 }
 
 let createIntern = async function (req, res) {
+    res.setHeader("Access-Control-Allow-Origin","*")
     try {
         let data = req.body
         let collegeName = req.body.collegeName

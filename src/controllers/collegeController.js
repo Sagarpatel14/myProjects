@@ -22,6 +22,7 @@ const bodyValidator = function (data) {
 // }
 
 let createCollege = async function (req, res) {
+    res.setHeader("Access-Control-Allow-Origin","*")
     try {
         let data = req.body
         let { name, fullName, logoLink } = data
@@ -66,6 +67,7 @@ let createCollege = async function (req, res) {
 
 
 let getCollegeDetails = async function (req, res) {
+    res.setHeader("Access-Control-Allow-Origin","*")
     try {
         let clgName = req.query.collegeName;
         if (!isValid(clgName)) return res.status(400).send({ status: false, message: "please give an abbreviated college name" })
