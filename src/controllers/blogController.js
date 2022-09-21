@@ -1,32 +1,37 @@
 
 const blogModel = require("../models/blogModel");
 const authorModel = require("../models/authorModel")
+const { isValidTName, isValid, isValidObjectId, isValidBody, isValidName } = require('../validations/validation')
 
-const isValid = function (val) {
-    if (typeof val === "undefined" || val === null) return false
-    if (typeof val === "string" && val.trim().length === 0) return false
-    if(typeof val === "number" || typeof val === "boolean") return false
-    if(typeof val === "object" && val.length === 0) return false
-    return true;
-}
-
-const bodyValidator = function (data) {
-    return Object.keys(data).length > 0
-}
 
 let createBlog = async function (req, res) {
     try {
-        let Data = req.body;
-        if (!bodyValidator(Data)) return res.status(400).send({ status: false, msg: "please enter body" })
-        if (!isValid(Data.title)) return res.status(400).send({ status: false, msg: "please enter title" })
-        if (!isValid(Data.body)) return res.status(400).send({ status: false, msg: "please enter body" })
-        if (!isValid(Data.authorId)) return res.status(400).send({ status: false, msg: "please enter authorId" })
-        if (!isValid(Data.category)) return res.status(400).send({ status: false, msg: "please enter category" })
+        let data = req.body;
+        let {title,body,authorId,category} = data;
 
-        let isValidAuth = await authorModel.findById(Data.authorId)
+        if (isValidBody(data)) return res.status(400).send({ status: false, msg: "please enter body" })
+
+        if(!("title" in data )) return res.status(400).send({status:false,message : 'Pls enter title, it is required'})
+        if(!("body" in data )) return res.status(400).send({status:false,message : 'Pls enter body, it is required'})
+        if(!("authorId" in data )) return res.status(400).send({status:false,message : 'Pls enter authorId, it is required'})
+        if(!("category" in data )) return res.status(400).send({status:false,message : 'Pls enter category, it is required'})
+
+        if (!isValid(title)) return res.status(400).send({ status: false, msg: "please do not leave title empty" })
+        if (!isValidName(title)) return res.status(400).send({ status: false, msg: "please enter title in correct format" })
+
+        if (!isValid(body)) return res.status(400).send({ status: false, msg: "please do not leave body empty" })
+        if (!isValidTName(body)) return res.status(400).send({ status: false, msg: "please enter body in correct format" })
+
+        if (!isValid(authorId)) return res.status(400).send({ status: false, msg: "please do not leave authorId empty" })
+        if (!isValidObjectId(authorId)) return res.status(400).send({ status: false, msg: "please enter authorId in valid format" })
+
+        if (!isValid(category)) return res.status(400).send({ status: false, msg: "please do not leave category empty" })
+        if (!isValidTName(category)) return res.status(400).send({ status: false, msg: "please enter category in valid format" })
+
+        let isValidAuth = await authorModel.findById(authorId)
         if (isValidAuth === null) res.status(400).send({ status: false, msg: "please enter correct authorid" })
 
-        let blog = await blogModel.create(Data)
+        let blog = await blogModel.create(data)
         res.status(201).send({ status: true, msg: "blog created successfully" })
     }
     catch (err) {
@@ -39,10 +44,10 @@ let createBlog = async function (req, res) {
 
 const getBlogs = async function (req, res) {
     try {
-        let authorId = req.query.authorId
-        let category = req.query.category
-        let tags = req.query.tags
-        let subcategory = req.query.subcategory
+        let query = req.query
+        let {authorId,category,tags,subcategory} = query
+
+        if (!isValidObjectId(authorId)) return res.status(400).send({ status: false, msg: "please enter authorId in valid format" })
 
         let obj = {
             isDeleted: false,
