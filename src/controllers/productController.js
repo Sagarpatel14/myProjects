@@ -1,5 +1,5 @@
 const productModel = require('../models/productModel')
-const { validInstallment, isValidPrice, isValidSize, isImageFile, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName } = require('../validation/valid')
+const { validInstallment, isValidPrice, isValidSize, isImageFile, isValid, isValidName, isValidBody, isValidObjectId } = require('../validation/valid')
 const { uploadFile } = require('../validation/aws')
 
 
@@ -9,6 +9,7 @@ const createProduct = async function (req, res) {
     try {
         const body = req.body
         const files = req.files
+        //console.log(files)
         //===================================body check============================================>
         if (isValidBody(body)) return res.status(400).send({ status: false, message: "Please provied Data" })
 

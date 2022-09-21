@@ -1,9 +1,7 @@
-const { isValidObjectId } = require('mongoose');
-const { findOne } = require('../models/cartModel');
 const cartModel = require('../models/cartModel');
 const orderModel = require('../models/orderModel');
 const userModel = require('../models/userModel');
-const { isValid, isValidBody } = require('../validation/valid');
+const { isValid, isValidBody,isValidObjectId } = require('../validation/valid');
 
 const createOrder = async function (req, res) {
     try {

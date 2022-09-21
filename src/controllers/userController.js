@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');//require password bcrypt
 const { uploadFile } = require('../validation/aws')
 const jwt = require('jsonwebtoken')
 
-const { validInstallment, isValidPrice, isValidSize, isImageFile, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidPincode, isValidDate, isValidObjectId, isValidrating, isValidratingLength, isValidTName } = require('../validation/valid')
+const {isImageFile, isValid, isValidName, isValidEmail, isValidMobile, isValidPassword, isValidBody, isValidPincode, isValidObjectId } = require('../validation/valid')
 //<==================================user Create =======================================>
 const createUser = async function (req, res) {
     try {
@@ -12,7 +12,7 @@ const createUser = async function (req, res) {
         // console.log(body)
         //<==========================body Check =============================================>
         if (isValidBody(body)) return res.status(400).send({ status: false, message: "Please enter body" })
-        const { fname, lname, email, profileImage, phone, password, address, shipping, billing } = body
+        const { fname, lname, email, profileImage, phone, password, address } = body
 
 
 
@@ -49,7 +49,7 @@ const createUser = async function (req, res) {
         let files = req.files
         //console.log(files);
         if (!(files && files.length > 0)) {
-            return res.status(400).send({ status: false, message: " Please Provide The Profile Image" });
+            return res.status(400).send({ status: false, message: "Please Provide The Profile Image" });
         }
         if (!isImageFile(files[0].originalname)) return res.status(400).send({ status: false, message: " Please Provide The Profile Image in jpeg,jpg,png,gif,JPGE,JPG,PNG,GIF" });
 

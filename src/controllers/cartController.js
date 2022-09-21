@@ -2,7 +2,7 @@ const cartModel = require('../models/cartModel')
 const productModel = require('../models/productModel')
 const userModel = require('../models/userModel')
 
-let { isValidLimit, isValid, isValidName, isValidEmail, isValidExcerpt, isValidMobile, isValidPassword, isValidIsbn, isValidBody, isValidTitle, isValidObjectId, } = require('../validation/valid')
+let { isValid,  isValidBody, isValidObjectId, } = require('../validation/valid')
 
 
 const createCart = async function (req, res) {
@@ -41,7 +41,7 @@ const createCart = async function (req, res) {
         if (cart) {
             let productIds = cart.items.map(x => x.productId.toString())
             if (productIds.includes(productId)) {
-                let updatedCart = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: userId }, { $inc: { "items.quantity": 1, totalPrice: productPrice } }, { new: true })
+                let updatedCart = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: userId }, { $inc: { "items.$.quantity": 1, totalPrice: productPrice } }, { new: true })
                 return res.status(200).send({ status: true, message: "items added successfully", data: updatedCart })
             }
             else {
